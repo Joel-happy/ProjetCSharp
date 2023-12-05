@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("GestionIventaire")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("ApiWebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("GestionIventaire")]
-[assembly: System.Reflection.AssemblyTitleAttribute("GestionIventaire")]
+[assembly: System.Reflection.AssemblyProductAttribute("ApiWebApp")]
+[assembly: System.Reflection.AssemblyTitleAttribute("ApiWebApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Généré par la classe MSBuild WriteCodeFragment.
