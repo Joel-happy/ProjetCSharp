@@ -13,10 +13,10 @@
 
 ### • *Services*
 → Implement business logic / rules
-→ Interact with data access layer
+→ Interact with data access layer to isolate CRUD operation on the database
 
 ### • *DataAccess*
-→ Interaction with actual database
+→ Interaction with actual database using ADO.NET
 → Performs operations such as CRUD
 
 ## // --- High-level Flow --- \\\
@@ -38,13 +38,13 @@ The HTTP method specifies the action performed on that resource <br>
 The controller extracts all relevant data from the request such as query parameters or the request body
 
 ### • *Service Interaction*
-The controller delegates the processing of the request to the appropriate service. The service will contain all business logic needed to handle the specific CRUD operation. The service will interact with the data access layer in the form of a repository.
+The controller delegates the processing of the request to the appropriate service. **The service implements all business logic needed to handle the specific CRUD operation and interacts directly with the database using ADO.NET.
 
 ### • *Data Access Layer (Repository / DAO (data access object))*
 The repository is responsible for database operations such as CRUD.
 
 ### • *Database Interaction*
-The repository interacts with the actual database to perform said CRUD operations.
+The service interacts with the actual database to perform CRUD operations using ADO.NET
 
 ### • *Response Generation*
 The service receives the result from the data access layer and prepares a HTTP response. The response may include the data requested (a list of users) or a success / failue status (creating a user / deleting a user).
