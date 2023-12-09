@@ -38,7 +38,7 @@ The HTTP method specifies the action performed on that resource <br>
 The controller extracts all relevant data from the request such as query parameters or the request body
 
 ### • *Service Interaction*
-The controller delegates the processing of the request to the appropriate service. **The service implements all business logic needed to handle the specific CRUD operation and interacts directly with the database using ADO.NET.
+The controller delegates the processing of the request to the appropriate service. The service implements all business logic needed to handle the specific CRUD operation and interacts directly with the database using ADO.NET.
 
 ### • *Data Access Layer (Repository / DAO (data access object))*
 The repository is responsible for database operations such as CRUD.
