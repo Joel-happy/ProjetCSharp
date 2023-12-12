@@ -21,6 +21,8 @@ namespace ApiWebApp
             {
                 // Asynchronously accept a TCP client.
                 TcpClient client = await listener.AcceptTcpClientAsync();
+
+                // Convention to show that the result is intentionally being ignored
                 _ = ProcessRequestAsync(client);
             }
         }

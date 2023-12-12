@@ -1,0 +1,49 @@
+---------------------------------------------------------------------------------------------------------------------------
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+---------------------------------------------------------------------------------------------------------------------------
+// *** static async Task ...;
+//
+// DESCRIPTION :
+//  ---> A static command is tied to the class itself and not to an instance of a class. That's why you don't need to create an instance
+//  of a class to use a static method. 
+// 
+//  ---> Async signifies that it's an asynchrounous method. This means that the program can continue to work while waiting for a
+//  particular async method to finish. An async method is able to use the keyword "await" which goes hand in hand.
+//
+//  async Task MyAsyncMethod()
+//  {
+//    await SomeAsyncOperation();
+//  } 
+//
+//  This creates an async method that when called, will execute the function "SomeSyncOperation". The keyword "await" allows the
+//  "MyAsyncMethod" to asynchrounously wait until "SomeSyncOperation" is complete.
+//
+//  ---> "Task" (or "Task<T>" (T represents the type)) indicates the result type. An asynchrounous method returns a "Task" which is 
+//  the ongoing work of an asynchrounous method. If the method doesn't result anything, "Task" will be used, however, if a method 
+//  that returns an int, "Task<int>" will be used.
+---------------------------------------------------------------------------------------------------------------------------
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+---------------------------------------------------------------------------------------------------------------------------
+// *** TcpListener listener = new TcpListener(System.Net.IPAddress.Parse("127.0.0.1"), 8080);
+//
+// DESCRIPTION :
+//  ---> TCP means Transmission Control Protocol. A TCP listener will enable us to establish a stable and reliable communication
+//  channel in contrary to UDP. This will be used to listen to requests.
+//
+//  ---> System.Net.IPAddress.Parse() will create an instance of the IPAddress class. Here's where we'll specify the chosen IP address
+//  In this case, we specified the loopback address which represents the local machine (localhost) on the port 8080.
+---------------------------------------------------------------------------------------------------------------------------
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+---------------------------------------------------------------------------------------------------------------------------
+// *** TcpClient client = await listener.AcceptTcpClientAsync();
+// *** _ = ProcessRequestAsync(client);
+//
+// DESCRIPTION :
+//  ---> This is where we'll set up our TCP client which is responsible for accepting an incoming TCP client connection async.
+//  Once the connection is established, the program will resume.
+//
+//  ---> Now that the connection has been established, we can call our function without any problems because we know that the
+//  client cannot be empty thanks to the await. The await will wait for a result from the listener. If no client, then the
+//  function ProcessRequestAsync(client) will never be called.
+//  The _ (underscore) is a convention to show that the value returned is intentionally ignored. This is meant to put the 
+//  focus on the asynchronous function than waiting for its completion. If removing the _, it will asked you for an await.
