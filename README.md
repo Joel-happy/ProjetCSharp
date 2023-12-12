@@ -1,6 +1,6 @@
 # Introduction
 
-## // --- Project Structure Overview --- \\\
+## --- Project Structure Overview ---
 
 ### • *Controllers*
 → Handle incoming HTTP requests <br>
@@ -19,7 +19,7 @@
 → Interaction with actual database
 → Performs operations such as CRUD
 
-## // --- High-level Flow --- \\\
+## --- High-level Flow ---
 
 ### • *Incoming HTTP Request*
 API receives a HTTP request from the client. This could be a request to create a new user, update user information, delete a user or retrieve all users.

@@ -11,19 +11,16 @@ namespace ApiWebApp
     {
         static async Task Main()
         {
-            // Create a TCP listener that listens on the loopback address and on the port 8080
+            // Create a TCP listener that listens on the loopback address (localhost) and on the port 8080
             TcpListener listener = new TcpListener(System.Net.IPAddress.Parse("127.0.0.1"), 8080);
             listener.Start();
-
+            
             Console.WriteLine("Listening for requests...");
 
-            // Continuously accept incoming TCP clients
             while (true)
             {
                 // Asynchronously accept a TCP client.
                 TcpClient client = await listener.AcceptTcpClientAsync();
-
-                // Start processing the request in a separate asynchronous method
                 _ = ProcessRequestAsync(client);
             }
         }
@@ -41,8 +38,7 @@ namespace ApiWebApp
             {
                 // Read the first line of the HTTP request
                 string request = await reader.ReadLineAsync();
-
-                // Display the received request in the console
+               
                 Console.WriteLine($"Received request: {request}");
                 
                 string result = ReadDataFromDatabase();
@@ -86,7 +82,6 @@ namespace ApiWebApp
         // Returns project root path
         static string GetProjectRoot()
         {
-            // Logic to determine the project root directory
             string executableDirectory = AppDomain.CurrentDomain.BaseDirectory;
             return Path.Combine(executableDirectory, "../../../../");
         }
