@@ -12,11 +12,11 @@
 → Define data structure
 
 ### • *Services*
-→ Implement business logic / rules
+→ Implement business logic / rules <br>
 → Interact with data access layer to isolate CRUD operation on the database
 
 ### • *DataAccess*
-→ Interaction with actual database
+→ Interaction with actual database <br>
 → Performs operations such as CRUD
 
 ## --- High-level Flow ---
