@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
-using System.Net.Sockets;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,100 +9,94 @@ namespace ApiWebApp
 {
     class Program
     {
-        static async Task Main()
+        static Task Main()
         {
-            // Create a TCP listener that listens on the loopback address (localhost) and on the port 8080
-            TcpListener listener = new TcpListener(System.Net.IPAddress.Parse("127.0.0.1"), 8080);
+            // Create a Http Listener that listens on the loopback address (localhost), on the port 8080
+            HttpListener listener = new HttpListener();
+            listener.Prefixes.Add("http://localhost:8080/");
             listener.Start();
-            
             Console.WriteLine("Listening for requests...");
 
             while (true)
             {
-                // Asynchronously accept a TCP client.
-                TcpClient client = await listener.AcceptTcpClientAsync();
+                HttpListenerContext context = listener.GetContext();
 
                 // _ is a convention to show that the result is intentionally being ignored
-                _ = RouteAndHandleRequestAsync(client);
+                _ = RouteAndHandleRequestAsync(context);
             }
         }
-        
-        static async Task RouteAndHandleRequestAsync(TcpClient client)
+
+        static async Task RouteAndHandleRequestAsync(HttpListenerContext context)
         {
-            using (NetworkStream stream = client.GetStream())
-            using (StreamReader reader = new StreamReader(stream))
-            using (StreamWriter writer = new StreamWriter(stream))
-            {
-                // Read and parse the request 
-                string request = await reader.ReadLineAsync();
-                Console.WriteLine($"Received request: {request}");
+            // Extract the request and response objects
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse response = context.Response;
 
-                string route = DetermineRoute(request);
-
-                switch (route)
-                {
-                    case "/users":
-                        string result = ReadDataFromDatabase();
-                        string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body>" + result + "</body></html>";
-
-                        // Write the HTTP response to the client
-                        await writer.WriteAsync(response);
-                        
-                        break;
-                    default:
-                        await writer.WriteAsync("HTTP/1.1 404 Not Found\r\n\r\n");
-                        break;
-                }
-            }
+            string route = request.RawUrl;
             
-            client.Close();
-        }
-        
-        static string DetermineRoute(string request)
-        {
-            // Splits request line into parts using space as a delimiter
-            string[] requestParts = request.Split(' ');
-            
-            // Check if they're enough parts in request to extract the route
-            if (requestParts.Length > 1)
+            switch (route)
             {
-                // Return route, typically the second part in a request
-                return requestParts[1];
+                case "/users":
+                    //
+                    // PUT THIS INTO 'CONTROLLERS/'
+                    //
+
+                    string result = GetUsers();
+                    string responseBody = $"<html><body>{result}</body></html>";
+
+                    // Write the HTTP response to the client
+                    byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(responseBody);
+                    response.ContentLength64 = responseBytes.Length;
+                    Stream output = response.OutputStream;
+
+                    await output.WriteAsync(responseBytes, 0, responseBytes.Length);
+
+                    break;
+                default:
+                    // 404 error if route doesn't exist
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
             }
 
-            // Default to root route if not specifed route is identified
-            return "/";
+            
+            response.Close();
         }
 
-        static string ReadDataFromDatabase()
+        static string GetUsers()
         {
+            // Construct full path to the SQLite database file
             string databasePath = Path.Combine(GetProjectRoot(), "db", "db.sqlite");
 
             using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={databasePath}; Version = 3;"))
             {
                 connection.Open();
-                
+
                 using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
+                    // StringBuilder to store the result from the database
                     StringBuilder result = new StringBuilder();
 
+                    // Iterate through the results of the query
                     while (reader.Read())
                     {
+                        // Extract values from the database record
                         string username = reader.GetString(1);
                         string email = reader.GetString(2);
                         string password = reader.GetString(3);
 
+                        // Append the formatted result to the StringBuilder
                         result.AppendLine($"Username : {username}, Email : {email}, Password : {password} \n");
                     }
 
                     connection.Close();
+
                     return result.ToString();
                 }
             }
         }
 
-        // Returns project root path
+        // Get project root path
         static string GetProjectRoot()
         {
             string executableDirectory = AppDomain.CurrentDomain.BaseDirectory;

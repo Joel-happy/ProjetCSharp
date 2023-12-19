@@ -40,7 +40,7 @@ The controller extracts all relevant data from the request such as query paramet
 ### • *Service Interaction*
 The controller delegates the processing of the request to the appropriate service. The service implements all business logic needed to handle the specific CRUD operation and interacts directly with the database.
 
-### • *Data Access Layer (Repository / DAO (data access object))*
+### • *Data Access Layer (Repository)*
 The repository is responsible for database operations such as CRUD.
 
 ### • *Database Interaction*
