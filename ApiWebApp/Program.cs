@@ -1,8 +1,11 @@
-﻿using System;
+﻿using ApiWebApp.Models;
+using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Net;
-using System.Text;
+using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ApiWebApp
@@ -11,10 +14,11 @@ namespace ApiWebApp
     {
         static Task Main()
         {
-            // Create a Http Listener that listens on the loopback address (localhost), on the port 8080
+            // Create a HttpListener that listens on the loopback address (localhost), on the port 8080
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:8080/");
             listener.Start();
+
             Console.WriteLine("Listening for requests...");
 
             while (true)
@@ -25,30 +29,39 @@ namespace ApiWebApp
                 _ = RouteAndHandleRequestAsync(context);
             }
         }
-
+        
         static async Task RouteAndHandleRequestAsync(HttpListenerContext context)
         {
-            // Extract the request and response objects
             HttpListenerRequest request = context.Request;
             HttpListenerResponse response = context.Response;
-
+            
             string route = request.RawUrl;
             
             switch (route)
             {
                 case "/users":
                     //
-                    // PUT THIS INTO 'CONTROLLERS/'
+                    // (TEMP) ---> 'CONTROLLERS/'
                     //
 
+                    // Get response body
                     string result = GetUsers();
-                    string responseBody = $"<html><body>{result}</body></html>";
-
-                    // Write the HTTP response to the client
+                    string responseBody = $"{result}";
+                    
+                    // Get length of response
                     byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(responseBody);
                     response.ContentLength64 = responseBytes.Length;
+
+                    // Set content type
+                    response.ContentType = MediaTypeNames.Application.Json;
+
+                    // Set status code
+                    response.StatusCode = (int)HttpStatusCode.OK;
+
+                    // Get the output where data will be written
                     Stream output = response.OutputStream;
 
+                    // Write HTTP response
                     await output.WriteAsync(responseBytes, 0, responseBytes.Length);
 
                     break;
@@ -57,8 +70,8 @@ namespace ApiWebApp
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
             }
-
             
+             
             response.Close();
         }
 
@@ -67,6 +80,9 @@ namespace ApiWebApp
             // Construct full path to the SQLite database file
             string databasePath = Path.Combine(GetProjectRoot(), "db", "db.sqlite");
 
+            List<Account> accounts = new List<Account>();
+
+
             using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={databasePath}; Version = 3;"))
             {
                 connection.Open();
@@ -74,9 +90,6 @@ namespace ApiWebApp
                 using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    // StringBuilder to store the result from the database
-                    StringBuilder result = new StringBuilder();
-
                     // Iterate through the results of the query
                     while (reader.Read())
                     {
@@ -85,13 +98,32 @@ namespace ApiWebApp
                         string email = reader.GetString(2);
                         string password = reader.GetString(3);
 
-                        // Append the formatted result to the StringBuilder
-                        result.AppendLine($"Username : {username}, Email : {email}, Password : {password} \n");
+                        // Create new 'account'
+                        Account account = new Account
+                        {
+                            Username = username,
+                            Email = email,
+                            Password = password
+                        };
+                        accounts.Add(account);
                     }
-
+                    
                     connection.Close();
 
-                    return result.ToString();
+                    // Encapsulate list of accounts to provide a structured JSON response with a 'accounts' wrapper
+                    AccountList accountList = new AccountList
+                    {
+                        accounts = accounts
+                    };
+
+                    // Serialize list of accounts to JSON
+                    string jsonResult = JsonSerializer.Serialize(accountList, new JsonSerializerOptions
+                    {
+                        // Format to improve readability
+                        WriteIndented = true
+                    });
+
+                    return jsonResult;
                 }
             }
         }
