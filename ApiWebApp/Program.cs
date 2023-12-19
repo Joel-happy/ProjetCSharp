@@ -22,35 +22,56 @@ namespace ApiWebApp
                 // Asynchronously accept a TCP client.
                 TcpClient client = await listener.AcceptTcpClientAsync();
 
-                // Convention to show that the result is intentionally being ignored
-                _ = ProcessRequestAsync(client);
+                // _ is a convention to show that the result is intentionally being ignored
+                _ = RouteAndHandleRequestAsync(client);
             }
         }
-
-        static async Task ProcessRequestAsync(TcpClient client)
+        
+        static async Task RouteAndHandleRequestAsync(TcpClient client)
         {
-            // Open a network stream for reading and writing data to the client
             using (NetworkStream stream = client.GetStream())
-
-            // Create a StreamReader for reading data from the network stream
             using (StreamReader reader = new StreamReader(stream))
-
-            // Create a StreamWriter for writing data to the network stream
             using (StreamWriter writer = new StreamWriter(stream))
             {
-                // Read the first line of the HTTP request
+                // Read and parse the request 
                 string request = await reader.ReadLineAsync();
-               
                 Console.WriteLine($"Received request: {request}");
-                
-                string result = ReadDataFromDatabase();
-                string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body>" + result + "</body></html>";
 
-                // Write the HTTP response to the client
-                await writer.WriteAsync(response);
+                string route = DetermineRoute(request);
+
+                switch (route)
+                {
+                    case "/users":
+                        string result = ReadDataFromDatabase();
+                        string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body>" + result + "</body></html>";
+
+                        // Write the HTTP response to the client
+                        await writer.WriteAsync(response);
+                        
+                        break;
+                    default:
+                        await writer.WriteAsync("HTTP/1.1 404 Not Found\r\n\r\n");
+                        break;
+                }
             }
             
             client.Close();
+        }
+        
+        static string DetermineRoute(string request)
+        {
+            // Splits request line into parts using space as a delimiter
+            string[] requestParts = request.Split(' ');
+            
+            // Check if they're enough parts in request to extract the route
+            if (requestParts.Length > 1)
+            {
+                // Return route, typically the second part in a request
+                return requestParts[1];
+            }
+
+            // Default to root route if not specifed route is identified
+            return "/";
         }
 
         static string ReadDataFromDatabase()
@@ -60,7 +81,7 @@ namespace ApiWebApp
             using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={databasePath}; Version = 3;"))
             {
                 connection.Open();
-
+                
                 using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
