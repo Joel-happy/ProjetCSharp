@@ -1,4 +1,4 @@
-﻿ namespace ApiWebApp.Models
+﻿namespace ApiWebApp.Models
 {
     public class Account
     {
