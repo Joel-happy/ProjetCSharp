@@ -1,5 +1,6 @@
 ﻿using ApiWebApp.Controllers;
 using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -18,10 +19,17 @@ namespace ApiWebApp
 
             while (true)
             {
-                HttpListenerContext context = listener.GetContext();
+                try
+                {
+                    HttpListenerContext context = listener.GetContext();
 
-                // _ is a convention to show that the result is intentionally being ignored
-                _ = RouteAndHandleRequestAsync(context);
+                    // _ is a convention to show that the result is intentionally being ignored
+                    _ = RouteAndHandleRequestAsync(context);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occured while receiving the request : {ex.Message}");
+                }
             }
         }
         
@@ -35,7 +43,15 @@ namespace ApiWebApp
             switch (route)
             {
                 case "/accounts":
-                    await AccountController.HandleAccountsAsync(context);
+                    try
+                    {
+                        await AccountController.HandleAccountsAsync(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error in handling /accounts : {ex.Message}");
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    }
                     break;
                 case "/products":
                     // await ProductController.HandleProductsAsync(context);
@@ -43,9 +59,20 @@ namespace ApiWebApp
                 default:
                     // 404 error if route doesn't exist
                     response.StatusCode = (int)HttpStatusCode.NotFound;
+
+                    // Get the output where data will be written
+                    using (Stream output = response.OutputStream)
+                    {
+                        // Provide an error message in the response body
+                        string notFoundResponse = "404 Not Found";
+                        byte[] notFoundResponseBytes = System.Text.Encoding.UTF8.GetBytes(notFoundResponse);
+                        response.ContentLength64 = notFoundResponseBytes.Length;
+                        
+                        // Write error response
+                        await output.WriteAsync(notFoundResponseBytes, 0, notFoundResponseBytes.Length);
+                    }
                     break;
             }
-   
             response.Close();
         }
     }

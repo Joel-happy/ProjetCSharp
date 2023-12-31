@@ -11,41 +11,47 @@ namespace ApiWebApp.DataAccess
     {
         public static async Task<List<Account>> GetAccountsDatabaseAsync()
         {
-            // Construct full path to the SQLite database file
-            string databasePath = Path.Combine(GetProjectRoot(), "db", "db.sqlite");
-            
-            List<Account> accounts = new List<Account>();
-
-            using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={databasePath}; Version = 3;"))
+            try
             {
-                await connection.OpenAsync();
+                // Construct full path to the SQLite database file
+                string databasePath = Path.Combine(GetProjectRoot(), "db", "db.sqlite");
 
-                using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
-                using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
+                List<Account> accounts = new List<Account>();
+
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={databasePath}; Version = 3;"))
                 {
-                    // Iterate through the results of the query
-                    while (await reader.ReadAsync())
+                    await connection.OpenAsync();
+
+                    using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
+                    using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
                     {
-                        // Extract values from the database record
-                        string username = reader.GetString(1);
-                        string email = reader.GetString(2);
-                        string password = reader.GetString(3);
-
-                        // Create new 'account'
-                        Account account = new Account
+                        // Iterate through the results of the query
+                        while (await reader.ReadAsync())
                         {
-                            Username = username,
-                            Email = email,
-                            Password = password
-                        };
-                        accounts.Add(account);
+                            // Extract values from the database record
+                            string username = reader.GetString(1);
+                            string email = reader.GetString(2);
+                            string password = reader.GetString(3);
+
+                            // Create new 'account'
+                            Account account = new Account
+                            {
+                                Username = username,
+                                Email = email,
+                                Password = password
+                            };
+                            accounts.Add(account);
+                        }
+                        connection.Close();
                     }
-
-                    connection.Close();
                 }
+                return accounts;
             }
-
-            return accounts;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetAccountsDatabaseAsync() : {ex.Message}");
+                return new List<Account>();
+            }
         }
 
         // Get project root path

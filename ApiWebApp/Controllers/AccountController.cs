@@ -52,10 +52,8 @@ namespace ApiWebApp.Controllers
                 // Set status code
                 response.StatusCode = (int)HttpStatusCode.OK;
 
-                // Get the output where data will be written
                 using (Stream output = response.OutputStream)
                 {
-                    // Write HTTP response
                     byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(result);
                     response.ContentLength64 = responseBytes.Length;
                     await output.WriteAsync(responseBytes, 0, responseBytes.Length);
@@ -67,15 +65,13 @@ namespace ApiWebApp.Controllers
                 
                 // Set status code for internal server error
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
+                
                 using (Stream output = response.OutputStream)
                 {
-                    // Provide an error message in the response body
                     string errorResponse = "An error occurred while processing the request";
                     byte[] errorResponseBytes = System.Text.Encoding.UTF8.GetBytes(errorResponse);
                     response.ContentLength64 = errorResponseBytes.Length;
-                    
-                    // Write error response
+
                     await output.WriteAsync(errorResponseBytes, 0, errorResponseBytes.Length);
                 }
             }
