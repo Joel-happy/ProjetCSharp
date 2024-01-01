@@ -24,7 +24,7 @@ namespace ApiWebApp
                     HttpListenerContext context = listener.GetContext();
 
                     // _ is a convention to show that the result is intentionally being ignored
-                    _ = RouteAndHandleRequestAsync(context);
+                    _ = HandleRouteAsync(context);
                 }
                 catch (Exception ex)
                 {
@@ -33,13 +33,12 @@ namespace ApiWebApp
             }
         }
         
-        static async Task RouteAndHandleRequestAsync(HttpListenerContext context)
+        static async Task HandleRouteAsync(HttpListenerContext context)
         {
-            HttpListenerRequest request = context.Request;
             HttpListenerResponse response = context.Response;
-            
-            string route = request.RawUrl;
-            
+
+            string route = context.Request.Url.AbsolutePath;
+
             switch (route)
             {
                 case "/accounts":
@@ -57,23 +56,28 @@ namespace ApiWebApp
                     // await ProductController.HandleProductsAsync(context);
                     break;
                 default:
-                    // 404 error if route doesn't exist
-                    response.StatusCode = (int)HttpStatusCode.NotFound;
-
-                    // Get the output where data will be written
-                    using (Stream output = response.OutputStream)
-                    {
-                        // Provide an error message in the response body
-                        string notFoundResponse = "404 Not Found";
-                        byte[] notFoundResponseBytes = System.Text.Encoding.UTF8.GetBytes(notFoundResponse);
-                        response.ContentLength64 = notFoundResponseBytes.Length;
-                        
-                        // Write error response
-                        await output.WriteAsync(notFoundResponseBytes, 0, notFoundResponseBytes.Length);
-                    }
+                    HandleNotFound(response);
                     break;
             }
             response.Close();
+        }
+
+        private static async void HandleNotFound(HttpListenerResponse response)
+        {
+            // 404 error if route doesn't exist
+            response.StatusCode = (int)HttpStatusCode.NotFound;
+
+            // Get the output where data will be written
+            using (Stream output = response.OutputStream)
+            {
+                // Provide an error message in the response body
+                string notFoundResponse = "404 Not Found";
+                byte[] notFoundResponseBytes = System.Text.Encoding.UTF8.GetBytes(notFoundResponse);
+                response.ContentLength64 = notFoundResponseBytes.Length;
+
+                // Write error response
+                await output.WriteAsync(notFoundResponseBytes, 0, notFoundResponseBytes.Length);
+            }
         }
     }
 }

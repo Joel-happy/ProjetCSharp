@@ -9,13 +9,12 @@ namespace ApiWebApp.Services
 {
     public class AccountService
     {
+        // Service READ
         public static async Task<ApiResult<string>> GetAccountsAsync()
         {
             try
             {
-                // Business logic (if needed)
-
-                ApiResult<List<Account>>  apiResult = await AccountRepository.GetAccountsDatabaseAsync();
+                ApiResult<List<Account>> apiResult = await AccountRepository.GetAccountsDatabaseAsync();
 
                 if (apiResult.IsSuccess)
                 {
@@ -40,10 +39,61 @@ namespace ApiWebApp.Services
                 }
             }
             catch (Exception ex)
-            {        
+            {
                 Console.WriteLine($"Error in GetAccountsAsync() : {ex.Message}");
                 return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
             }
+        }
+
+        // Service READ by Id
+        public static async Task<ApiResult<string>> GetAccountByIdAsync(string accountId)
+        {
+            try
+            {
+                // Check if parameter is empty or not an int
+                if (string.IsNullOrEmpty(accountId) || !int.TryParse(accountId, out _))
+                {
+                    return new ApiResult<string> { ErrorMessage = "Invalid 'id' parameter" };
+                }
+
+                // Convert parameter to int
+                int intAccountId = int.Parse(accountId);
+
+                ApiResult<Account> apiResult = await AccountRepository.GetAccountByIdDatabaseAsync(intAccountId);
+
+                if (apiResult.IsSuccess)
+                {
+                    if (!AllPropertiesAreNull(apiResult.Result))
+                    {
+                        string jsonResult = JsonSerializer.Serialize(apiResult.Result, new JsonSerializerOptions
+                        {
+                            WriteIndented = true
+                        });
+
+                        return new ApiResult<string> { Result = jsonResult };
+                    }
+                    else
+                    {
+                        // Account not found
+                        return new ApiResult<string> { ErrorMessage = "Account not found" };
+                    }
+                }
+                else
+                {
+                    return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetAccountByIdAsync() : {ex.Message}");
+                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+            }
+        }
+
+        // Check if the account is null / not found
+        private static bool AllPropertiesAreNull(Account account)
+        {
+            return account.Id == 0 && account.Username == null && account.Email == null && account.Password == null;
         }
     }
 }
