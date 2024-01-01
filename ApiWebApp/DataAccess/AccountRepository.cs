@@ -9,7 +9,7 @@ namespace ApiWebApp.DataAccess
 {
     public class AccountRepository
     {
-        public static async Task<List<Account>> GetAccountsDatabaseAsync()
+        public static async Task<ApiResult<List<Account>>> GetAccountsDatabaseAsync()
         {
             try
             {
@@ -29,6 +29,7 @@ namespace ApiWebApp.DataAccess
                         while (await reader.ReadAsync())
                         {
                             // Extract values from the database record
+                            int id = reader.GetInt32(0);
                             string username = reader.GetString(1);
                             string email = reader.GetString(2);
                             string password = reader.GetString(3);
@@ -36,6 +37,7 @@ namespace ApiWebApp.DataAccess
                             // Create new 'account'
                             Account account = new Account
                             {
+                                Id = id,
                                 Username = username,
                                 Email = email,
                                 Password = password
@@ -45,12 +47,12 @@ namespace ApiWebApp.DataAccess
                         connection.Close();
                     }
                 }
-                return accounts;
+                return new ApiResult<List<Account>> { Result = accounts };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountsDatabaseAsync() : {ex.Message}");
-                return new List<Account>();
+                return new ApiResult<List<Account>> { ErrorMessage = "An error occured while processing the request" };
             }
         }
 

@@ -9,33 +9,40 @@ namespace ApiWebApp.Services
 {
     public class AccountService
     {
-        public static async Task<string> GetAccountsAsync()
+        public static async Task<ApiResult<string>> GetAccountsAsync()
         {
             try
             {
                 // Business logic (if needed)
 
-                List<Account> accounts = await AccountRepository.GetAccountsDatabaseAsync();
+                ApiResult<List<Account>>  apiResult = await AccountRepository.GetAccountsDatabaseAsync();
 
-                // Encapsulate list of accounts to provide a structured JSON response with a 'accounts' wrapper
-                AccountList accountList = new AccountList
+                if (apiResult.IsSuccess)
                 {
-                    accounts = accounts
-                };
+                    // Encapsulate list of accounts to provide a structured JSON response with a 'accounts' wrapper
+                    AccountList accountList = new AccountList
+                    {
+                        accounts = apiResult.Result
+                    };
 
-                // Serialize list of accounts to JSON
-                string jsonResult = JsonSerializer.Serialize(accountList, new JsonSerializerOptions
+                    // Serialize list of accounts to JSON
+                    string jsonResult = JsonSerializer.Serialize(accountList, new JsonSerializerOptions
+                    {
+                        // Format to improve readability
+                        WriteIndented = true
+                    });
+
+                    return new ApiResult<string> { Result = jsonResult };
+                } 
+                else
                 {
-                    // Format to improve readability
-                    WriteIndented = true
-                });
-
-                return jsonResult;
+                    return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                }
             }
             catch (Exception ex)
-            {
+            {        
                 Console.WriteLine($"Error in GetAccountsAsync() : {ex.Message}");
-                return "An error occured while processing the request";
+                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
             }
         }
     }

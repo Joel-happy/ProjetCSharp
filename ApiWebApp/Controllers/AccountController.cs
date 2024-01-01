@@ -4,6 +4,7 @@ using System.Net.Mime;
 using System.IO;
 using ApiWebApp.Services;
 using System;
+using ApiWebApp.Models;
 
 namespace ApiWebApp.Controllers
 {
@@ -44,36 +45,32 @@ namespace ApiWebApp.Controllers
             try
             {
                 // Get result
-                string result = await AccountService.GetAccountsAsync();
-
-                // Set content type
-                response.ContentType = MediaTypeNames.Application.Json;
-
-                // Set status code
-                response.StatusCode = (int)HttpStatusCode.OK;
-
-                using (Stream output = response.OutputStream)
+                ApiResult<string> apiResult = await AccountService.GetAccountsAsync();
+                
+                if (apiResult.IsSuccess)
                 {
-                    byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(result);
-                    response.ContentLength64 = responseBytes.Length;
-                    await output.WriteAsync(responseBytes, 0, responseBytes.Length);
+                    // Set content type
+                    response.ContentType = MediaTypeNames.Application.Json;
+
+                    // Set status code
+                    response.StatusCode = (int)HttpStatusCode.OK;
+
+                    using (Stream output = response.OutputStream)
+                    {
+                        byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(apiResult.Result);
+                        response.ContentLength64 = responseBytes.Length;
+                        await output.WriteAsync(responseBytes, 0, responseBytes.Length);
+                    }
+                }
+                else
+                {
+                    InternalServerError(response);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in HandleReadOperationAsync() : {ex.Message}");
-                
-                // Set status code for internal server error
-                response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                
-                using (Stream output = response.OutputStream)
-                {
-                    string errorResponse = "An error occurred while processing the request";
-                    byte[] errorResponseBytes = System.Text.Encoding.UTF8.GetBytes(errorResponse);
-                    response.ContentLength64 = errorResponseBytes.Length;
-
-                    await output.WriteAsync(errorResponseBytes, 0, errorResponseBytes.Length);
-                }
+                InternalServerError(response);
             }
             finally
             {
@@ -100,6 +97,21 @@ namespace ApiWebApp.Controllers
         {
             // TO DO
             await Task.CompletedTask;
+        }
+
+        private static async void InternalServerError(HttpListenerResponse response)
+        {
+            // Set status code for internal server error
+            response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            using (Stream output = response.OutputStream)
+            {
+                string errorResponse = "An error occurred while processing the request";
+                byte[] errorResponseBytes = System.Text.Encoding.UTF8.GetBytes(errorResponse);
+                response.ContentLength64 = errorResponseBytes.Length;
+
+                await output.WriteAsync(errorResponseBytes, 0, errorResponseBytes.Length);
+            }
         }
     }
 }
