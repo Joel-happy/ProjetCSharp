@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace ApiWebApp.DataAccess
@@ -45,12 +46,17 @@ namespace ApiWebApp.DataAccess
                         connection.Close();
                     }
                 }
-                return new ApiResult<List<Account>> { Result = accounts };
+                return new ApiResult<List<Account>> { Result = accounts, StatusCode = HttpStatusCode.OK };
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"SQLite error in GetAccountsDatabaseAsync() : {ex.Message}");
+                return new ApiResult<List<Account>> { ErrorMessage = "A database error occurred", StatusCode = HttpStatusCode.InternalServerError };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountsDatabaseAsync() : {ex.Message}");
-                return new ApiResult<List<Account>> { ErrorMessage = "An error occured while processing the request" };
+                return new ApiResult<List<Account>> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
         }
 
@@ -68,16 +74,13 @@ namespace ApiWebApp.DataAccess
                     using (SQLiteCommand command = new SQLiteCommand($"SELECT * FROM account WHERE account_id={accountId}", connection))
                     using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
                     {
-                        // Iterate through the results of the query
                         while (await reader.ReadAsync())
                         {
-                            // Extract values from the database record
                             int id = reader.GetInt32(0);
                             string username = reader.GetString(1);
                             string email = reader.GetString(2);
                             string password = reader.GetString(3);
                             
-                            // Create new 'account'
                             account = new Account
                             {
                                 Id = id,
@@ -89,12 +92,17 @@ namespace ApiWebApp.DataAccess
                         connection.Close();
                     }
                 }
-                return new ApiResult<Account> { Result = account };
+                return new ApiResult<Account> { Result = account, StatusCode = HttpStatusCode.OK };
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"SQLite error in GetAccountsDatabaseAsync() : {ex.Message}");
+                return new ApiResult<Account> { ErrorMessage = "A database error occurred", StatusCode = HttpStatusCode.InternalServerError };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAccountByIdDatabaseAsync() : {ex.Message}");
-                return new ApiResult<Account> { ErrorMessage = "An error occured while processing the request" };
+                Console.WriteLine($"Error in GetAccountsDatabaseAsync() : {ex.Message}");
+                return new ApiResult<Account> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System;
+using System.Net;
 
 namespace ApiWebApp.Services
 {
@@ -31,17 +32,17 @@ namespace ApiWebApp.Services
                         WriteIndented = true
                     });
 
-                    return new ApiResult<string> { Result = jsonResult };
+                    return new ApiResult<string> { Result = jsonResult, StatusCode = apiResult.StatusCode };
                 } 
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                    return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountsAsync() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
         }
 
@@ -50,17 +51,17 @@ namespace ApiWebApp.Services
         {
             try
             {
-                // Check if parameter is empty or not an int
+                // Check if accountId (query parameter) is empty or not an int
                 if (string.IsNullOrEmpty(accountId) || !int.TryParse(accountId, out _))
                 {
-                    return new ApiResult<string> { ErrorMessage = "Invalid 'id' parameter" };
+                    return new ApiResult<string> { ErrorMessage = "Invalid 'id' parameter", StatusCode = HttpStatusCode.BadRequest };
                 }
-
+                
                 // Convert parameter to int
                 int intAccountId = int.Parse(accountId);
 
                 ApiResult<Account> apiResult = await AccountRepository.GetAccountByIdDatabaseAsync(intAccountId);
-
+                
                 if (apiResult.IsSuccess)
                 {
                     if (!AllPropertiesAreNull(apiResult.Result))
@@ -69,24 +70,24 @@ namespace ApiWebApp.Services
                         {
                             WriteIndented = true
                         });
-
-                        return new ApiResult<string> { Result = jsonResult };
+                        
+                        return new ApiResult<string> { Result = jsonResult, StatusCode = HttpStatusCode.OK };
                     }
                     else
                     {
                         // Account not found
-                        return new ApiResult<string> { ErrorMessage = "Account not found" };
+                        return new ApiResult<string> { ErrorMessage = "Account not found", StatusCode = HttpStatusCode.NotFound };
                     }
                 }
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                    return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountByIdAsync() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request" };
+                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
         }
 

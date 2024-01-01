@@ -59,12 +59,12 @@ namespace ApiWebApp.Controllers
                 
                 if (apiResult.IsSuccess)
                 {
-                    SendResponse(response, HttpStatusCode.OK, apiResult.Result);
+                    SendResponse(response, apiResult.StatusCode, apiResult.Result);
                 }
                 else
                 {
                     // Error coming from previous layer
-                    SendResponse(response, HttpStatusCode.InternalServerError, apiResult.ErrorMessage);
+                    SendResponse(response, apiResult.StatusCode, apiResult.ErrorMessage);
                 }
             }
             catch (Exception ex)
@@ -93,16 +93,16 @@ namespace ApiWebApp.Controllers
 
                 if (apiResult.IsSuccess)
                 {
-                    SendResponse(response, HttpStatusCode.OK, apiResult.Result);
+                    SendResponse(response, apiResult.StatusCode, apiResult.Result);
                 }
                 else
                 {
-                    SendResponse(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
+                    SendResponse(response, apiResult.StatusCode, apiResult.ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in HandleReadOperationAsync() : {ex.Message}");
+                Console.WriteLine($"Error in HandleReadOperationByIdAsync() : {ex.Message}");
                 SendResponse(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
             }
             finally

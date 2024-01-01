@@ -1,4 +1,6 @@
-﻿namespace ApiWebApp.Models
+﻿using System.Net;
+
+namespace ApiWebApp.Models
 {
     public class ApiResult<T>
     {
@@ -8,5 +10,7 @@
         
         // If ErorrMessage == null ---> IsSuccess == true
         public bool IsSuccess => ErrorMessage == null;
+
+        public HttpStatusCode StatusCode { get; set; }
     }
 }

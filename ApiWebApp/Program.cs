@@ -42,15 +42,7 @@ namespace ApiWebApp
             switch (route)
             {
                 case "/accounts":
-                    try
-                    {
-                        await AccountController.HandleAccountsAsync(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error in handling /accounts : {ex.Message}");
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    }
+                    await AccountController.HandleAccountsAsync(context);
                     break;
                 case "/products":
                     // await ProductController.HandleProductsAsync(context);
