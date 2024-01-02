@@ -5,6 +5,7 @@ using System.IO;
 using ApiWebApp.Services;
 using System;
 using ApiWebApp.Models;
+using System.Text.Json;
 
 namespace ApiWebApp.Controllers
 {
@@ -43,12 +44,8 @@ namespace ApiWebApp.Controllers
 
             response.Close();
         }
-        
-        //
-        // OPERATIONS
-        //
-
-        // Handle READ
+      
+        // Handle READ operation
         private static async Task HandleReadOperationAsync(HttpListenerContext context)
         {
             HttpListenerResponse response = context.Response;
@@ -79,7 +76,7 @@ namespace ApiWebApp.Controllers
             }
         }
 
-        // Handle READ by Id
+        // Handle READ by Id operation
         private static async Task HandleReadOperationByIdAsync(HttpListenerContext context)
         {
             HttpListenerRequest request = context.Request;
@@ -111,31 +108,68 @@ namespace ApiWebApp.Controllers
             }
         }
 
-        // Handle CREATE
+        // Handle CREATE operation
         private static async Task HandleCreateOperationAsync(HttpListenerContext context)
         {
-            // TO DO
-            await Task.CompletedTask;
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse response = context.Response;
+
+            Account newAccount;
+
+            try
+            {
+                newAccount = await ReadRequestBodyAccount(request);
+
+            }
+            catch (JsonException ex)
+            {
+                SendResponse(response, HttpStatusCode.BadRequest, "Invalid 'account'");
+                return;
+            }
+
+            try
+            {
+                ApiResult<string> apiResult = await AccountService.CreateAccountAsync(newAccount);
+
+                if (apiResult.IsSuccess)
+                {
+                    SendResponse(response, apiResult.StatusCode, apiResult.Result);
+                }
+                else
+                {
+                    SendResponse(response, apiResult.StatusCode, apiResult.ErrorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in HandleCreateOperationAsync() : {ex.Message}");
+                SendResponse(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
+            }
+            finally
+            {
+                response.Close();
+            }
         }
 
-        // Handle UPDATE
+        // Handle UPDATE operation
         private static async Task HandleUpdateOperationAsync(HttpListenerContext context)
         {
             // TO DO
             await Task.CompletedTask;
         }
 
-        // Handle DELETE
+        // Handle DELETE operation
         private static async Task HandleDeleteOperationAsync(HttpListenerContext context)
         {
             // TO DO
             await Task.CompletedTask;
         }
-
-        //
-        // RESPONSE
-        //
         
+        //
+        // Helper Functions
+        //
+
+        // Send a HTTP response to the user
         private static async void SendResponse(HttpListenerResponse response, HttpStatusCode statusCode, string result)
         {
             // Set content type
@@ -150,6 +184,20 @@ namespace ApiWebApp.Controllers
                 response.ContentLength64 = responseBytes.Length;
                 await output.WriteAsync(responseBytes, 0, responseBytes.Length);
             }
+        }
+
+        // Extract account from request body
+        private static async Task<Account> ReadRequestBodyAccount(HttpListenerRequest request)
+        {
+            string requestBody;
+            using (var reader = new StreamReader(request.InputStream, request.ContentEncoding)) 
+            {
+                requestBody = await reader.ReadToEndAsync();
+            }
+
+            Account account = JsonSerializer.Deserialize<Account>(requestBody);
+
+            return account;
         }
     }
 }
