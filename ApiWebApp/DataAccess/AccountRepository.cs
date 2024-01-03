@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -17,7 +16,7 @@ namespace ApiWebApp.DataAccess
             {
                 List<Account> accounts = new List<Account>();
 
-                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={GetDatabaseFilePath()}; Version = 3;"))
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
 
@@ -69,7 +68,7 @@ namespace ApiWebApp.DataAccess
             {
                 Account account = new Account();
 
-                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={GetDatabaseFilePath()}; Version = 3;"))
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
 
@@ -119,7 +118,7 @@ namespace ApiWebApp.DataAccess
         {
             try
             {
-                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={GetDatabaseFilePath()}; Version = 3;"))
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
                     
@@ -147,23 +146,6 @@ namespace ApiWebApp.DataAccess
                 Console.WriteLine($"Error in CreateAccountRepository() : {ex.Message}");
                 return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
-        }
-
-        // Get database file path
-        private static string GetDatabaseFilePath()
-        {
-            string dir = "db";
-            string fileName = "db.db";
-
-            return Path.Combine(GetProjectRoot(), dir, fileName);
-        }
-
-
-        // Get project root path
-        private static string GetProjectRoot()
-        {
-            string executableDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            return Path.Combine(executableDirectory, "../../../../");
         }
     }
 }

@@ -64,7 +64,7 @@ namespace ApiWebApp.Services
                 
                 if (apiResult.IsSuccess)
                 {
-                    if (!AllPropertiesAreNull(apiResult.Result))
+                    if (!HelperService.AllPropertiesAreNull(apiResult.Result))
                     {
                         string jsonResult = JsonSerializer.Serialize(apiResult.Result, new JsonSerializerOptions
                         {
@@ -92,26 +92,37 @@ namespace ApiWebApp.Services
         }
 
         // Service CREATE
-        public static async Task<ApiResult<string>> CreateAccountAsync(Account account)
+        public static async Task<ApiResult<string>> CreateAccountAsync(string accountRequestBody)
         {
             try
             {
-                if (IsAccountValid(account))
-                {
-                    ApiResult<string> apiResult = await AccountRepository.CreateAccountRepository(account);
+                ApiResult<Account> deserializationResult = HelperService.DeserializeAccount(accountRequestBody);
 
-                    if (apiResult.IsSuccess)
+                if (deserializationResult.IsSuccess)
+                {
+                    Account account = deserializationResult.Result;
+
+                    if (HelperService.IsAccountValid(account))
                     {
-                        return new ApiResult<string> { Result = apiResult.Result, StatusCode = apiResult.StatusCode };
+                        ApiResult<string> apiResult = await AccountRepository.CreateAccountRepository(account);
+
+                        if (apiResult.IsSuccess)
+                        {
+                            return new ApiResult<string> { Result = apiResult.Result, StatusCode = apiResult.StatusCode };
+                        }
+                        else
+                        {
+                            return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
+                        }
                     }
                     else
                     {
-                        return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
+                        return new ApiResult<string> { ErrorMessage = "Invalid 'account'", StatusCode = HttpStatusCode.BadRequest };
                     }
                 }
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = "Invalid 'account'", StatusCode = HttpStatusCode.BadRequest };
+                    return new ApiResult<string> { ErrorMessage = deserializationResult.ErrorMessage, StatusCode = deserializationResult.StatusCode };
                 }
             }
             catch (Exception ex)
@@ -119,33 +130,6 @@ namespace ApiWebApp.Services
                 Console.WriteLine($"Error in CreateAccountAsync() : {ex.Message}");
                 return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
             }
-        }
-
-        //
-        // Helper Functions
-        //
-
-        // Check if account is null / not found
-        private static bool AllPropertiesAreNull(Account account)
-        {
-            return account.Id == 0 && account.Username == null && account.Email == null && account.Password == null;
-        }
-
-        // Check if account is valid for use
-        private static bool IsAccountValid(Account account)
-        {
-            if (account == null)
-            {
-                return false;
-            }
-
-            return IsString(account.Username) && IsString(account.Email) && IsString(account.Password);
-        }
-
-        // Check if a value is a string
-        private static bool IsString(object value)
-        {
-            return value is string stringValue && !string.IsNullOrEmpty(stringValue);
         }
     }
 }
