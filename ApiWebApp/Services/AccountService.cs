@@ -10,6 +10,9 @@ namespace ApiWebApp.Services
 {
     public class AccountService
     {
+        private const string ErrorMessage = "An error occured while processing the request";
+
+
         // Service READ
         public static async Task<ApiResult<string>> GetAccountsAsync()
         {
@@ -32,17 +35,27 @@ namespace ApiWebApp.Services
                         WriteIndented = true
                     });
 
-                    return new ApiResult<string> { Result = jsonResult, StatusCode = apiResult.StatusCode };
+                    return new ApiResult<string> { 
+                        Result = jsonResult, 
+                        StatusCode = apiResult.StatusCode 
+                    };
                 } 
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
+                    return new ApiResult<string> { 
+                        ErrorMessage = apiResult.ErrorMessage, 
+                        StatusCode = apiResult.StatusCode 
+                    };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountsAsync() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
         }
 
@@ -71,26 +84,39 @@ namespace ApiWebApp.Services
                             WriteIndented = true
                         });
                         
-                        return new ApiResult<string> { Result = jsonResult, StatusCode = HttpStatusCode.OK };
+                        return new ApiResult<string> { 
+                            Result = jsonResult, 
+                            StatusCode = HttpStatusCode.OK 
+                        };
                     }
                     else
                     {
                         // Account not found
-                        return new ApiResult<string> { ErrorMessage = "Account not found", StatusCode = HttpStatusCode.NotFound };
+                        return new ApiResult<string> { 
+                            ErrorMessage = "Account not found", 
+                            StatusCode = HttpStatusCode.NotFound 
+                        };
                     }
                 }
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
+                    return new ApiResult<string> { 
+                        ErrorMessage = apiResult.ErrorMessage, 
+                        StatusCode = apiResult.StatusCode 
+                    };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountByIdAsync() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
         }
-
+        
         // Service CREATE
         public static async Task<ApiResult<string>> CreateAccountAsync(string accountRequestBody)
         {
@@ -102,33 +128,50 @@ namespace ApiWebApp.Services
                 {
                     Account account = deserializationResult.Result;
 
-                    if (HelperService.IsAccountValid(account))
+                    if (HelperService.IsAccountValid(account) &&
+                        await HelperService.IsUsernameAvailableAsync(account.Username) && 
+                        await HelperService.IsEmailAvailableAsync(account.Email))
                     {
                         ApiResult<string> apiResult = await AccountRepository.CreateAccountRepository(account);
 
                         if (apiResult.IsSuccess)
                         {
-                            return new ApiResult<string> { Result = apiResult.Result, StatusCode = apiResult.StatusCode };
+                            return new ApiResult<string> { 
+                                Result = apiResult.Result, 
+                                StatusCode = apiResult.StatusCode 
+                            };
                         }
                         else
                         {
-                            return new ApiResult<string> { ErrorMessage = apiResult.ErrorMessage, StatusCode = apiResult.StatusCode };
+                            return new ApiResult<string> { 
+                                ErrorMessage = apiResult.ErrorMessage, 
+                                StatusCode = apiResult.StatusCode 
+                            };
                         }
                     }
                     else
                     {
-                        return new ApiResult<string> { ErrorMessage = "Invalid 'account'", StatusCode = HttpStatusCode.BadRequest };
+                        return new ApiResult<string> { 
+                            ErrorMessage = "Invalid 'account' OR username / email is already in use", 
+                            StatusCode = HttpStatusCode.BadRequest 
+                        };
                     }
                 }
                 else
                 {
-                    return new ApiResult<string> { ErrorMessage = deserializationResult.ErrorMessage, StatusCode = deserializationResult.StatusCode };
+                    return new ApiResult<string> {
+                        ErrorMessage = deserializationResult.ErrorMessage, 
+                        StatusCode = deserializationResult.StatusCode 
+                    };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in CreateAccountAsync() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<string> { 
+                    ErrorMessage = ErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError 
+                };
             }
         }
     }

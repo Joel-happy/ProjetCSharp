@@ -8,6 +8,8 @@ namespace ApiWebApp.Controllers
 {
     public class AccountController
     {
+        private const string ErrorMessage = "An error occured while processing the request";
+
         // Determine CRUD operation
         public static async Task HandleAccountsAsync(HttpListenerContext context)
         {
@@ -51,7 +53,7 @@ namespace ApiWebApp.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in HandleReadOperationAsync() : {ex.Message}");
-                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
+                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, ErrorMessage);
             }
             finally
             {
@@ -75,7 +77,7 @@ namespace ApiWebApp.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in HandleReadOperationByIdAsync() : {ex.Message}");
-                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
+                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, ErrorMessage);
             }
             finally
             {
@@ -99,7 +101,7 @@ namespace ApiWebApp.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in HandleCreateOperationAsync() : {ex.Message}");
-                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, "An error occured while processing the request");
+                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, ErrorMessage);
             }
             finally
             {

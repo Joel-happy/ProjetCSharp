@@ -11,12 +11,9 @@ namespace ApiWebApp.Controllers
         // Send appropriate response based on the service response
         public static async Task HandleApiResult(HttpListenerResponse response, ApiResult<string> apiResult)
         {
-            if (apiResult.IsSuccess)
-            {
+            if (apiResult.IsSuccess) {
                 await SendResponseAsync(response, apiResult.StatusCode, apiResult.Result);
-            }
-            else
-            {
+            } else {
                 await SendResponseAsync(response, apiResult.StatusCode, apiResult.ErrorMessage);
             }
         }
@@ -46,7 +43,6 @@ namespace ApiWebApp.Controllers
             {
                 requestBody = await reader.ReadToEndAsync();
             }
-
             return requestBody;
         }
     }

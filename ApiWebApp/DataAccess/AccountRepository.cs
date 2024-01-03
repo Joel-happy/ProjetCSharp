@@ -73,9 +73,9 @@ namespace ApiWebApp.DataAccess
                     await connection.OpenAsync();
 
                     // Use parameterized query to prevent SQL injection
-                    using (SQLiteCommand command = new SQLiteCommand($"SELECT * FROM account WHERE account_id = @AccountId", connection))
+                    using (SQLiteCommand command = new SQLiteCommand($"SELECT * FROM account WHERE account_id = @accountId", connection))
                     {
-                        command.Parameters.AddWithValue("@AccountId", accountId);
+                        command.Parameters.AddWithValue("@accountId", accountId);
 
                         using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
                         {
@@ -122,12 +122,12 @@ namespace ApiWebApp.DataAccess
                 {
                     await connection.OpenAsync();
                     
-                    using (SQLiteCommand command = new SQLiteCommand("INSERT INTO account(username,email,password) VALUES(@Username, @Email, @Password)", connection))
+                    using (SQLiteCommand command = new SQLiteCommand("INSERT INTO account(username,email,password) VALUES(@username, @email, @password)", connection))
                     {
                         // Add parameters to command
-                        command.Parameters.AddWithValue("@Username", account.Username);
-                        command.Parameters.AddWithValue("@Email", account.Email);
-                        command.Parameters.AddWithValue("@Password", account.Password);
+                        command.Parameters.AddWithValue("@username", account.Username);
+                        command.Parameters.AddWithValue("@email", account.Email);
+                        command.Parameters.AddWithValue("@password", account.Password);
 
                         // Execute the command
                         await command.ExecuteNonQueryAsync();
