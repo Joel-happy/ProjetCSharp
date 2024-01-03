@@ -9,6 +9,9 @@ namespace ApiWebApp.DataAccess
 {
     public class AccountRepository
     {
+        private const string DatabaseErrorMessage = "A database error occured";
+        private const string ErrorMessage = "An error occured while processing the request";
+
         // Get accounts
         public static async Task<ApiResult<List<Account>>> GetAccountsRepositoryAsync()
         {
@@ -47,17 +50,26 @@ namespace ApiWebApp.DataAccess
                         }
                     }
                 }
-                return new ApiResult<List<Account>> { Result = accounts, StatusCode = HttpStatusCode.OK };
+                return new ApiResult<List<Account>> { 
+                    Result = accounts,
+                    StatusCode = HttpStatusCode.OK 
+                };
             }
             catch (SQLiteException ex)
             {
                 Console.WriteLine($"SQLite error in GetAccountsRepositoryAsync() : {ex.Message}");
-                return new ApiResult<List<Account>> { ErrorMessage = "A database error occurred", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<List<Account>> { 
+                    ErrorMessage = DatabaseErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError 
+                };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountsRepositoryAsync() : {ex.Message}");
-                return new ApiResult<List<Account>> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<List<Account>> { 
+                    ErrorMessage = ErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError 
+                };
             }
         }
 
@@ -104,12 +116,18 @@ namespace ApiWebApp.DataAccess
             catch (SQLiteException ex)
             {
                 Console.WriteLine($"SQLite error in GetAccountByIdRepositoryAsync() : {ex.Message}");
-                return new ApiResult<Account> { ErrorMessage = "A database error occurred", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<Account> { 
+                    ErrorMessage = DatabaseErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError 
+                };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAccountByIdRepositoryAsync() : {ex.Message}");
-                return new ApiResult<Account> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<Account> { 
+                    ErrorMessage = ErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError 
+                };
             }
         }
 
@@ -134,17 +152,86 @@ namespace ApiWebApp.DataAccess
                     }
                 }
                 
-                return new ApiResult<string> { Result = "Account created successfully", StatusCode = HttpStatusCode.Created };
+                return new ApiResult<string> { 
+                    Result = "Account created successfully", 
+                    StatusCode = HttpStatusCode.Created 
+                };
             }
             catch (SQLiteException ex)
             {
                 Console.WriteLine($"SQLite error in CreateAccountRepository() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "A database error occurred", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<string>
+                {
+                    ErrorMessage = DatabaseErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in CreateAccountRepository() : {ex.Message}");
-                return new ApiResult<string> { ErrorMessage = "An error occured while processing the request", StatusCode = HttpStatusCode.InternalServerError };
+                return new ApiResult<string> 
+                { 
+                    ErrorMessage = ErrorMessage, 
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+        }
+
+        // Delete account
+        public static async Task<ApiResult<string>> DeleteAccountRepositoryAsync(int accountIdToDelete)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
+                {
+                    await connection.OpenAsync();
+
+                    using (SQLiteCommand command = new SQLiteCommand("DELETE FROM account WHERE account_id = @accountId", connection))
+                    {
+                        command.Parameters.AddWithValue("@accountId", accountIdToDelete);
+
+                        // Execute the command and get the number of affected rows
+                        int affectedRows = await command.ExecuteNonQueryAsync();
+                        
+                        if (affectedRows > 0)
+                        {
+                            // The account was successfully deleted
+                            return new ApiResult<string>
+                            {
+                                Result = "Account deleted successfully",
+                                StatusCode = HttpStatusCode.NoContent
+                            };
+                        }
+                        else
+                        {
+                            // No rows were deleted, indicating that the account didn't exist
+                            return new ApiResult<string> { 
+                                ErrorMessage = "Account not found", 
+                                StatusCode = HttpStatusCode.NotFound 
+                            };
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"SQLite error in DeleteAccountRepositoryAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = DatabaseErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in DeleteAccountRepositoryAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
         }
     }

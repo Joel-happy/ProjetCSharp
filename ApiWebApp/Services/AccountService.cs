@@ -11,7 +11,7 @@ namespace ApiWebApp.Services
     public class AccountService
     {
         private const string ErrorMessage = "An error occured while processing the request";
-
+        private const string InvalidIdErrorMessage = "Invalid 'id'";
 
         // Service READ
         public static async Task<ApiResult<string>> GetAccountsAsync()
@@ -67,7 +67,10 @@ namespace ApiWebApp.Services
                 // Check if the query parameter is empty or not an int
                 if (string.IsNullOrEmpty(accountId) || !int.TryParse(accountId, out _))
                 {
-                    return new ApiResult<string> { ErrorMessage = "Invalid 'id' parameter", StatusCode = HttpStatusCode.BadRequest };
+                    return new ApiResult<string> { 
+                        ErrorMessage = InvalidIdErrorMessage, 
+                        StatusCode = HttpStatusCode.BadRequest 
+                    };
                 }
                 
                 // Convert parameter to int
@@ -173,6 +176,53 @@ namespace ApiWebApp.Services
                 return new ApiResult<string> { 
                     ErrorMessage = ErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
+                };
+            }
+        }
+
+        // Service DELETE
+        public static async Task<ApiResult<string>> DeleteAccountAsync(string accountIdToDelete)
+        {
+            try
+            {
+                // Check if the query parameter is empty or not an int
+                if (string.IsNullOrEmpty(accountIdToDelete) || !int.TryParse(accountIdToDelete, out _))
+                {
+                    return new ApiResult<string> { 
+                        ErrorMessage = InvalidIdErrorMessage, 
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                }
+
+                // Convert parameter to int
+                int intAccountIdToDelete = int.Parse(accountIdToDelete);
+
+                ApiResult<string> apiResult = await AccountRepository.DeleteAccountRepositoryAsync(intAccountIdToDelete);
+
+                if (apiResult.IsSuccess)
+                {
+                    return new ApiResult<string>
+                    {
+                        Result = apiResult.Result,
+                        StatusCode = apiResult.StatusCode
+                    };
+                }
+                else
+                {
+                    return new ApiResult<string>
+                    {
+                        ErrorMessage = apiResult.ErrorMessage,
+                        StatusCode = apiResult.StatusCode
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in DeleteAccountAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
                 };
             }
         }

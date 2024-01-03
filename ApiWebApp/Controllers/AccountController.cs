@@ -15,7 +15,7 @@ namespace ApiWebApp.Controllers
         {
             HttpListenerRequest request = context.Request;
             HttpListenerResponse response = context.Response;
-
+            
             switch (request.HttpMethod)
             {
                 case "GET":
@@ -119,8 +119,26 @@ namespace ApiWebApp.Controllers
         // Handle DELETE operation
         private static async Task HandleDeleteOperationAsync(HttpListenerContext context)
         {
-            // TO DO
-            await Task.CompletedTask;
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse response = context.Response;
+
+            string route = request.Url.AbsolutePath;
+            string accountIdToDelete = HelperController.GetIdAccountFromUrl(route);
+
+            try
+            {
+                ApiResult<string> apiResult = await AccountService.DeleteAccountAsync(accountIdToDelete);
+                await HelperController.HandleApiResult(response, apiResult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in HandleDeleteOperationAsync() : {ex.Message}");
+                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, ErrorMessage);
+            }
+            finally
+            {
+                response.Close();
+            }
         }
     }
 }

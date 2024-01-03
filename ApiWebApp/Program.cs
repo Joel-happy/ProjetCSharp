@@ -39,17 +39,17 @@ namespace ApiWebApp
 
             string route = context.Request.Url.AbsolutePath;
 
-            switch (route)
+            if (route.StartsWith("/accounts"))
             {
-                case "/accounts":
-                    await AccountController.HandleAccountsAsync(context);
-                    break;
-                case "/products":
-                    // await ProductController.HandleProductsAsync(context);
-                    break;
-                default:
-                    HandleNotFound(response);
-                    break;
+                await AccountController.HandleAccountsAsync(context);
+            }
+            else if (route.StartsWith("/products"))
+            {
+                // await ProductController.HandleProductsAsync(context);
+            }
+            else
+            {
+                HandleNotFound(response);
             }
             response.Close();
         }

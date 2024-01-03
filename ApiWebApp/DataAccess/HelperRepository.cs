@@ -50,7 +50,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite erro in IsUsernameInUseRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in IsUsernameInUseRepositoryAsync() : {ex.Message}");
                 return false;
             }
         }
@@ -74,7 +74,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite erro in IsEmailInUseRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in IsEmailInUseRepositoryAsync() : {ex.Message}");
                 return false;
             }
         }

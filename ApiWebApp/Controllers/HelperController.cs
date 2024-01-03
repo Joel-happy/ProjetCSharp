@@ -3,11 +3,39 @@ using System.Threading.Tasks;
 using System.Net.Mime;
 using System.IO;
 using ApiWebApp.Models;
+using System;
 
 namespace ApiWebApp.Controllers
 {
     public class HelperController
     {
+        //
+        // SYNC
+        // 
+
+        public static string GetIdAccountFromUrl(string route)
+        {
+            // URL pattern is "/accounts/{id}
+            // As to have a successfull Uri object, the "http://localhost" has to be added
+            var segments = new Uri("http://localhost" + route).Segments;
+
+            // segments[0] = /              (1st segment)
+            // segments[1] = accounts/      (2nd segment)
+            // segments[2] = 123/ (or 123)  (3rd segment)
+
+            // Check if there are enough segments in the URL path
+            if (segments.Length >= 3)
+            {
+               return segments[2].TrimEnd('/');
+            }
+            
+            return null;
+        }
+
+        //
+        // ASYNC
+        // 
+
         // Send appropriate response based on the service response
         public static async Task HandleApiResult(HttpListenerResponse response, ApiResult<string> apiResult)
         {
