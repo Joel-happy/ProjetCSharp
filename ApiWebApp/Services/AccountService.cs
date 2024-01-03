@@ -127,18 +127,20 @@ namespace ApiWebApp.Services
                 if (deserializationResult.IsSuccess)
                 {
                     Account account = deserializationResult.Result;
-
+                    
                     if (HelperService.IsAccountValid(account) &&
                         await HelperService.IsUsernameAvailableAsync(account.Username) && 
                         await HelperService.IsEmailAvailableAsync(account.Email))
                     {
+                        account.Password = HelperService.HashPassword(account.Password);
+
                         ApiResult<string> apiResult = await AccountRepository.CreateAccountRepository(account);
 
                         if (apiResult.IsSuccess)
                         {
                             return new ApiResult<string> { 
                                 Result = apiResult.Result, 
-                                StatusCode = apiResult.StatusCode 
+                                StatusCode = apiResult.StatusCode
                             };
                         }
                         else

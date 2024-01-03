@@ -2,7 +2,9 @@
 using System.Text.Json;
 using System.Net;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using ApiWebApp.DataAccess;
+using System.Text;
 using System;
 
 namespace ApiWebApp.Services
@@ -50,10 +52,24 @@ namespace ApiWebApp.Services
             return account.Id == 0 && account.Username == null && account.Email == null && account.Password == null;
         }
 
+        public static string HashPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                // Hash password from password bytes
+                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                // Convert hashed bytes to a string representation
+                string hashedPassword = BitConverter.ToString(hashedBytes);
+
+                return hashedPassword;
+            }
+        }
+
         // 
         // ASYNC FUNCTIONS
         //
-        
+
         // Check if an username is already in use
         public static async Task<bool> IsUsernameAvailableAsync(string username)
         {
