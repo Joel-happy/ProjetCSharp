@@ -8,28 +8,28 @@ using System.Net;
 
 namespace ApiWebApp.Services
 {
-    public class AccountService
+    public class ProductService
     {
         private const string ErrorMessage = "An error occured while processing the request";
         private const string InvalidIdErrorMessage = "Invalid 'id'";
 
         // Service READ
-        public static async Task<ApiResult<string>> GetAccountsAsync()
+        public static async Task<ApiResult<string>> GetProductsAsync()
         {
             try
             {
-                ApiResult<List<Account>> apiResult = await AccountRepository.GetAccountsRepositoryAsync();
+                ApiResult<List<Product>> apiResult = await ProductRepository.GetProductsRepositoryAsync();
 
                 if (apiResult.IsSuccess)
                 {
                     // Encapsulate list of accounts to provide a structured JSON response with a 'accounts' wrapper
-                    AccountList accountList = new AccountList
+                    ProductList productList = new ProductList
                     {
-                        accounts = apiResult.Result
+                        products = apiResult.Result
                     };
-
+                    
                     // Serialize list of accounts to JSON
-                    string jsonResult = JsonSerializer.Serialize(accountList, new JsonSerializerOptions
+                    string jsonResult = JsonSerializer.Serialize(productList, new JsonSerializerOptions
                     {
                         // Format to improve readability
                         WriteIndented = true
@@ -50,7 +50,7 @@ namespace ApiWebApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAccountsAsync() : {ex.Message}");
+                Console.WriteLine($"Error in GetProductsAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,
@@ -60,12 +60,12 @@ namespace ApiWebApp.Services
         }
 
         // Service READ by Id
-        public static async Task<ApiResult<string>> GetAccountByIdAsync(string accountId)
+        public static async Task<ApiResult<string>> GetProductByIdAsync(string productId)
         {
             try
             {
                 // Check if the query parameter is empty or not an int
-                if (string.IsNullOrEmpty(accountId) || !int.TryParse(accountId, out _))
+                if (string.IsNullOrEmpty(productId) || !int.TryParse(productId, out _))
                 {
                     return new ApiResult<string> { 
                         ErrorMessage = InvalidIdErrorMessage, 
@@ -74,13 +74,13 @@ namespace ApiWebApp.Services
                 }
                 
                 // Convert parameter to int
-                int intAccountId = int.Parse(accountId);
+                int intProductId = int.Parse(productId);
 
-                ApiResult<Account> apiResult = await AccountRepository.GetAccountByIdRepositoryAsync(intAccountId);
+                ApiResult<Product> apiResult = await ProductRepository.GetProductByIdRepositoryAsync(intProductId);
                 
                 if (apiResult.IsSuccess)
                 {
-                    if (!HelperService.IsAccountNull(apiResult.Result))
+                    if (!HelperService.IsProductNull(apiResult.Result))
                     {
                         string jsonResult = JsonSerializer.Serialize(apiResult.Result, new JsonSerializerOptions
                         {
@@ -96,7 +96,7 @@ namespace ApiWebApp.Services
                     {
                         // Account not found
                         return new ApiResult<string> { 
-                            ErrorMessage = "Account not found", 
+                            ErrorMessage = "Product not found", 
                             StatusCode = HttpStatusCode.NotFound 
                         };
                     }
@@ -111,7 +111,7 @@ namespace ApiWebApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAccountByIdAsync() : {ex.Message}");
+                Console.WriteLine($"Error in GetProductByIdAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,
@@ -121,23 +121,19 @@ namespace ApiWebApp.Services
         }
         
         // Service CREATE
-        public static async Task<ApiResult<string>> CreateAccountAsync(string accountRequestBody)
+        public static async Task<ApiResult<string>> CreateProductAsync(string productRequestBody)
         {
             try
             {
-                ApiResult<Account> deserializationResult = HelperService.DeserializeAccount(accountRequestBody);
+                ApiResult<Product> deserializationResult = HelperService.DeserializeProduct(productRequestBody);
 
                 if (deserializationResult.IsSuccess)
                 {
-                    Account account = deserializationResult.Result;
+                    Product product = deserializationResult.Result;
                     
-                    if (HelperService.IsAccountValid(account) &&
-                        await HelperService.IsAccountUsernameAvailableAsync(account.Username) && 
-                        await HelperService.IsAccountEmailAvailableAsync(account.Email))
+                    if (HelperService.IsProductValid(product) && await HelperService.IsProductNameAvailableAsync(product.Name))
                     {
-                        account.Password = HelperService.HashPassword(account.Password);
-
-                        ApiResult<string> apiResult = await AccountRepository.CreateAccountRepositoryAsync(account);
+                        ApiResult<string> apiResult = await ProductRepository.CreateProductRepositoryAsync(product);
 
                         if (apiResult.IsSuccess)
                         {
@@ -157,7 +153,7 @@ namespace ApiWebApp.Services
                     else
                     {
                         return new ApiResult<string> { 
-                            ErrorMessage = "Invalid 'account' OR username / email is already in use", 
+                            ErrorMessage = "Invalid 'product' OR name is already in use", 
                             StatusCode = HttpStatusCode.BadRequest 
                         };
                     }
@@ -172,7 +168,7 @@ namespace ApiWebApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in CreateAccountAsync() : {ex.Message}");
+                Console.WriteLine($"Error in CreateProductAsync() : {ex.Message}");
                 return new ApiResult<string> { 
                     ErrorMessage = ErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
@@ -181,11 +177,11 @@ namespace ApiWebApp.Services
         }
 
         // Service UPDATE
-        public static async Task<ApiResult<string>> UpdateAccountAsync(string accountIdToUpdate, string accountRequestBody)
+        public static async Task<ApiResult<string>> UpdateProductAsync(string productIdToUpdate, string productRequestBody)
         {
             try
             {
-                if (string.IsNullOrEmpty(accountIdToUpdate) || !int.TryParse(accountIdToUpdate, out _))
+                if (string.IsNullOrEmpty(productIdToUpdate) || !int.TryParse(productIdToUpdate, out _))
                 {
                     return new ApiResult<string>
                     {
@@ -194,18 +190,17 @@ namespace ApiWebApp.Services
                     };
                 }
 
-                ApiResult<Account> deserializationResult = HelperService.DeserializeAccount(accountRequestBody);
+                ApiResult<Product> deserializationResult = HelperService.DeserializeProduct(productRequestBody);
 
                 if (deserializationResult.IsSuccess)
                 {
-                    Account account = deserializationResult.Result;
+                    Product product = deserializationResult.Result;
 
-                    if (HelperService.IsAccountValid(account))
+                    if (HelperService.IsProductValid(product))
                     {
-                        account.Password = HelperService.HashPassword(account.Password);
-                        int intAccountIdToUpdate = int.Parse(accountIdToUpdate);
+                        int intProductIdToUpdate = int.Parse(productIdToUpdate);
 
-                        ApiResult<string> apiResult = await AccountRepository.UpdateAccountRepositoryAsync(intAccountIdToUpdate, account);
+                        ApiResult<string> apiResult = await ProductRepository.UpdateProductRepositoryAsync(intProductIdToUpdate, product);
 
                         if (apiResult.IsSuccess)
                         {
@@ -228,7 +223,7 @@ namespace ApiWebApp.Services
                     {
                         return new ApiResult<string>
                         {
-                            ErrorMessage = "Invalid 'account'",
+                            ErrorMessage = "Invalid 'product'",
                             StatusCode = HttpStatusCode.BadRequest
                         };
                     }
@@ -244,7 +239,7 @@ namespace ApiWebApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in UpdateAccountAsync() : {ex.Message}");
+                Console.WriteLine($"Error in UpdateProductAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,
@@ -254,12 +249,12 @@ namespace ApiWebApp.Services
         }
         
         // Service DELETE
-        public static async Task<ApiResult<string>> DeleteAccountAsync(string accountIdToDelete)
+        public static async Task<ApiResult<string>> DeleteProductAsync(string productIdToDelete)
         {
             try
             {
                 // Check if the query parameter is empty or not an int
-                if (string.IsNullOrEmpty(accountIdToDelete) || !int.TryParse(accountIdToDelete, out _))
+                if (string.IsNullOrEmpty(productIdToDelete) || !int.TryParse(productIdToDelete, out _))
                 {
                     return new ApiResult<string> { 
                         ErrorMessage = InvalidIdErrorMessage, 
@@ -268,9 +263,9 @@ namespace ApiWebApp.Services
                 }
 
                 // Convert parameter to int
-                int intAccountIdToDelete = int.Parse(accountIdToDelete);
+                int intProductIdToDelete = int.Parse(productIdToDelete);
 
-                ApiResult<string> apiResult = await AccountRepository.DeleteAccountRepositoryAsync(intAccountIdToDelete);
+                ApiResult<string> apiResult = await ProductRepository.DeleteProductRepositoryAsync(intProductIdToDelete);
 
                 if (apiResult.IsSuccess)
                 {
@@ -291,7 +286,7 @@ namespace ApiWebApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in DeleteAccountAsync() : {ex.Message}");
+                Console.WriteLine($"Error in DeleteProductAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,

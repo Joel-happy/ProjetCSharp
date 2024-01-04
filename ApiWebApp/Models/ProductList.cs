@@ -2,8 +2,8 @@
 
 namespace ApiWebApp.Models
 {
-    public class ProductList
+    public class AccountList
     {
-        public List<Product> products { get; set;}
+        public List<Account> accounts { get; set;}
     }
 }

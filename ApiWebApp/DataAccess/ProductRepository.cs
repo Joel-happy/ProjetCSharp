@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 
 namespace ApiWebApp.DataAccess
 {
-    public class AccountRepository
+    public class ProductRepository
     {
         private const string DatabaseErrorMessage = "A database error occured";
         private const string ErrorMessage = "An error occured while processing the request";
 
-        // READ Accounts
-        public static async Task<ApiResult<List<Account>>> GetAccountsRepositoryAsync()
+        // READ Products
+        public static async Task<ApiResult<List<Product>>> GetProductsRepositoryAsync()
         {
             try
             {
-                List<Account> accounts = new List<Account>();
-
+                List<Product> products = new List<Product>();
+                
                 using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
 
-                    using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM account", connection))
+                    using (SQLiteCommand command = new SQLiteCommand("SELECT * FROM product", connection))
                     {
                         using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
                         {
@@ -32,78 +32,78 @@ namespace ApiWebApp.DataAccess
                             {
                                 // Extract values from the database record
                                 int id = reader.GetInt32(0);
-                                string username = reader.GetString(1);
-                                string email = reader.GetString(2);
-                                string password = reader.GetString(3);
+                                string name = reader.GetString(1);
+                                string description = reader.GetString(2);
+                                decimal price = reader.GetDecimal(3);
 
-                                // Create new 'account'
-                                Account account = new Account
+                                // Create new 'product'
+                                Product product = new Product
                                 {
                                     Id = id,
-                                    Username = username,
-                                    Email = email,
-                                    Password = password
+                                    Name = name,
+                                    Description = description,
+                                    Price = price
                                 };
-                                accounts.Add(account);
+                                products.Add(product);
                             }
                             connection.Close();
                         }
                     }
                 }
-                return new ApiResult<List<Account>> { 
-                    Result = accounts,
+                return new ApiResult<List<Product>> { 
+                    Result = products,
                     StatusCode = HttpStatusCode.OK 
                 };
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in GetAccountsRepositoryAsync() : {ex.Message}");
-                return new ApiResult<List<Account>> { 
+                Console.WriteLine($"SQLite error in GetProductsRepositoryAsync() : {ex.Message}");
+                return new ApiResult<List<Product>> { 
                     ErrorMessage = DatabaseErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAccountsRepositoryAsync() : {ex.Message}");
-                return new ApiResult<List<Account>> { 
+                Console.WriteLine($"Error in GetProductsRepositoryAsync() : {ex.Message}");
+                return new ApiResult<List<Product>> { 
                     ErrorMessage = ErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
                 };
             }
         }
 
-        // READ Account by ID
-        public static async Task<ApiResult<Account>> GetAccountByIdRepositoryAsync(int accountId)
+        // READ Product by ID
+        public static async Task<ApiResult<Product>> GetProductByIdRepositoryAsync(int productId)
         {
             try
             {
-                Account account = new Account();
+                Product product = new Product();
 
                 using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
 
                     // Use parameterized query to prevent SQL injection
-                    using (SQLiteCommand command = new SQLiteCommand($"SELECT * FROM account WHERE account_id = @accountId", connection))
+                    using (SQLiteCommand command = new SQLiteCommand($"SELECT * FROM product WHERE product_id = @productId", connection))
                     {
-                        command.Parameters.AddWithValue("@accountId", accountId);
+                        command.Parameters.AddWithValue("@productId", productId);
 
                         using (SQLiteDataReader reader = (SQLiteDataReader)await command.ExecuteReaderAsync())
                         {
                             while (await reader.ReadAsync())
                             {
                                 int id = reader.GetInt32(0);
-                                string username = reader.GetString(1);
-                                string email = reader.GetString(2);
-                                string password = reader.GetString(3);
-
-                                account = new Account
+                                string name = reader.GetString(1);
+                                string description = reader.GetString(2);
+                                decimal price = reader.GetDecimal(3);
+                                
+                                product = new Product
                                 {
                                     Id = id,
-                                    Username = username,
-                                    Email = email,
-                                    Password = password
+                                    Name = name,
+                                    Description = description,
+                                    Price = price
                                 };
                             }
                             connection.Close();
@@ -111,31 +111,31 @@ namespace ApiWebApp.DataAccess
                     }
                 }
 
-                return new ApiResult<Account> { 
-                    Result = account, 
+                return new ApiResult<Product> { 
+                    Result = product, 
                     StatusCode = HttpStatusCode.OK 
                 };
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in GetAccountByIdRepositoryAsync() : {ex.Message}");
-                return new ApiResult<Account> { 
+                Console.WriteLine($"SQLite error in GetProductByIdRepositoryAsync() : {ex.Message}");
+                return new ApiResult<Product> { 
                     ErrorMessage = DatabaseErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAccountByIdRepositoryAsync() : {ex.Message}");
-                return new ApiResult<Account> { 
+                Console.WriteLine($"Error in GetProductByIdRepositoryAsync() : {ex.Message}");
+                return new ApiResult<Product> { 
                     ErrorMessage = ErrorMessage, 
                     StatusCode = HttpStatusCode.InternalServerError 
                 };
             }
         }
 
-        // CREATE Account
-        public static async Task<ApiResult<string>> CreateAccountRepositoryAsync(Account account)
+        // CREATE Product
+        public static async Task<ApiResult<string>> CreateProductRepositoryAsync(Product product)
         {
             try
             {
@@ -143,12 +143,12 @@ namespace ApiWebApp.DataAccess
                 {
                     await connection.OpenAsync();
                     
-                    using (SQLiteCommand command = new SQLiteCommand("INSERT INTO account(username,email,password) VALUES(@username, @email, @password)", connection))
+                    using (SQLiteCommand command = new SQLiteCommand("INSERT INTO product(name,description,price) VALUES(@name, @description, @price)", connection))
                     {
                         // Add parameters to command
-                        command.Parameters.AddWithValue("@username", account.Username);
-                        command.Parameters.AddWithValue("@email", account.Email);
-                        command.Parameters.AddWithValue("@password", account.Password);
+                        command.Parameters.AddWithValue("@name", product.Name);
+                        command.Parameters.AddWithValue("@description", product.Description);
+                        command.Parameters.AddWithValue("@price", product.Price);
 
                         // Execute the command
                         await command.ExecuteNonQueryAsync();
@@ -156,13 +156,13 @@ namespace ApiWebApp.DataAccess
                 }
                 
                 return new ApiResult<string> { 
-                    Result = "Account created successfully", 
+                    Result = "Product created successfully", 
                     StatusCode = HttpStatusCode.Created 
                 };
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in CreateAccountRepository() : {ex.Message}");
+                Console.WriteLine($"SQLite error in CreateProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = DatabaseErrorMessage,
@@ -172,7 +172,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in CreateAccountRepository() : {ex.Message}");
+                Console.WriteLine($"Error in CreateProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string> 
                 { 
                     ErrorMessage = ErrorMessage, 
@@ -180,9 +180,9 @@ namespace ApiWebApp.DataAccess
                 };
             }
         }
-        
-        // UPDATE Account
-        public static async Task<ApiResult<string>> UpdateAccountRepositoryAsync(int accountIdToUpdate, Account account)
+
+        // UPDATE Product
+        public static async Task<ApiResult<string>> UpdateProductRepositoryAsync(int productIdToUpdate, Product product)
         {
             try
             {
@@ -190,20 +190,20 @@ namespace ApiWebApp.DataAccess
                 {
                     await connection.OpenAsync();
                     
-                    using (SQLiteCommand command = new SQLiteCommand("UPDATE account SET username = @username, email = @email, password = @password WHERE account_id = @accountId", connection))
+                    using (SQLiteCommand command = new SQLiteCommand("UPDATE product SET name = @name, description = @description, price = @price WHERE product_id = @productId", connection))
                     {
-                        command.Parameters.AddWithValue("@username", account.Username);
-                        command.Parameters.AddWithValue("@email", account.Email);
-                        command.Parameters.AddWithValue("@password", account.Password);
-                        command.Parameters.AddWithValue("@accountId", accountIdToUpdate);
+                        command.Parameters.AddWithValue("@name", product.Name);
+                        command.Parameters.AddWithValue("@description", product.Description);
+                        command.Parameters.AddWithValue("@price", product.Price);
+                        command.Parameters.AddWithValue("@productId", productIdToUpdate);
                         
                         int affectedRows = await command.ExecuteNonQueryAsync();
-
+                        
                         if (affectedRows > 0)
                         {
                             return new ApiResult<string>
                             {
-                                Result = "Account updated successfully",
+                                Result = "Product updated successfully",
                                 StatusCode = HttpStatusCode.OK
                             };
                         }
@@ -211,7 +211,7 @@ namespace ApiWebApp.DataAccess
                         {
                             return new ApiResult<string>
                             {
-                                ErrorMessage = "Account not found",
+                                ErrorMessage = "Product not found",
                                 StatusCode = HttpStatusCode.NotFound
                             };
                         }
@@ -220,7 +220,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in UpdateAccountRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in UpdateProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = DatabaseErrorMessage,
@@ -230,7 +230,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in UpdateAccountRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"Error in UpdateProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,
@@ -239,18 +239,18 @@ namespace ApiWebApp.DataAccess
             }
         }
 
-        // DELETE Account
-        public static async Task<ApiResult<string>> DeleteAccountRepositoryAsync(int accountIdToDelete)
+        // DELETE Product
+        public static async Task<ApiResult<string>> DeleteProductRepositoryAsync(int productIdToDelete)
         {
             try
             {
                 using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
                 {
                     await connection.OpenAsync();
-
-                    using (SQLiteCommand command = new SQLiteCommand("DELETE FROM account WHERE account_id = @accountId", connection))
+                    
+                    using (SQLiteCommand command = new SQLiteCommand("DELETE FROM product WHERE product_id = @productId", connection))
                     {
-                        command.Parameters.AddWithValue("@accountId", accountIdToDelete);
+                        command.Parameters.AddWithValue("@productId", productIdToDelete);
 
                         // Execute the command and get the number of affected rows
                         int affectedRows = await command.ExecuteNonQueryAsync();
@@ -259,7 +259,7 @@ namespace ApiWebApp.DataAccess
                         {
                             return new ApiResult<string>
                             {
-                                Result = "Account deleted successfully",
+                                Result = "Product deleted successfully",
                                 StatusCode = HttpStatusCode.NoContent
                             };
                         }
@@ -267,7 +267,7 @@ namespace ApiWebApp.DataAccess
                         {
                             // No rows were deleted, indicating that the account didn't exist
                             return new ApiResult<string> { 
-                                ErrorMessage = "Account not found", 
+                                ErrorMessage = "Product not found", 
                                 StatusCode = HttpStatusCode.NotFound 
                             };
                         }
@@ -276,7 +276,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in DeleteAccountRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in DeleteProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = DatabaseErrorMessage,
@@ -286,7 +286,7 @@ namespace ApiWebApp.DataAccess
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in DeleteAccountRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"Error in DeleteProductRepositoryAsync() : {ex.Message}");
                 return new ApiResult<string>
                 {
                     ErrorMessage = ErrorMessage,

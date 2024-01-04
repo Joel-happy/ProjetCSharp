@@ -31,7 +31,7 @@ namespace ApiWebApp.DataAccess
         // ASYNC FUNCTIONS
         //
 
-        public static async Task<bool> IsUsernameAvailableRepositoryAsync(string username)
+        public static async Task<bool> IsAccountUsernameAvailableRepositoryAsync(string username)
         {
             try
             {
@@ -50,12 +50,12 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in IsUsernameInUseRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in IsAccountUsernameAvailableRepositoryAsync() : {ex.Message}");
                 return false;
             }
         }
 
-        public static async Task<bool> IsEmailAvailableRepositoryAsync(string email)
+        public static async Task<bool> IsAccountEmailAvailableRepositoryAsync(string email)
         {
             try
             {
@@ -74,7 +74,31 @@ namespace ApiWebApp.DataAccess
             }
             catch (SQLiteException ex)
             {
-                Console.WriteLine($"SQLite error in IsEmailInUseRepositoryAsync() : {ex.Message}");
+                Console.WriteLine($"SQLite error in IsAccountEmailAvailableRepositoryAsync() : {ex.Message}");
+                return false;
+            }
+        }
+
+        public static async Task<bool> IsProductNameAvailableRepositoryAsync(string name)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={GetDatabaseFilePath()}; Version = 3;"))
+                {
+                    await connection.OpenAsync();
+
+                    using (SQLiteCommand command = new SQLiteCommand("SELECT COUNT(*) FROM product WHERE name = @name", connection))
+                    {
+                        command.Parameters.AddWithValue("@name", name);
+
+                        int count = Convert.ToInt32(await command.ExecuteScalarAsync());
+                        return count == 0;
+                    }
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"SQLite error in IsProductNameAvailableRepositoryAsync() : {ex.Message}");
                 return false;
             }
         }

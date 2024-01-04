@@ -33,6 +33,21 @@ namespace ApiWebApp.Services
             }
         }
 
+        // Deserialize product from request body 
+        public static ApiResult<Product> DeserializeProduct(string requestBody)
+        {
+            try
+            {
+                Product product = JsonSerializer.Deserialize<Product>(requestBody);
+
+                return new ApiResult<Product> { Result = product };
+            }
+            catch (JsonException)
+            {
+                return new ApiResult<Product> { ErrorMessage = "Invalid 'product'", StatusCode = HttpStatusCode.BadRequest };
+            }
+        }
+
         // Check if account is valid for use
         public static bool IsAccountValid(Account account)
         {
@@ -41,15 +56,40 @@ namespace ApiWebApp.Services
             return IsString(account.Username) && IsString(account.Email) && IsString(account.Password);
         }
 
+        // Check if product is valid for use
+        public static bool IsProductValid(Product product)
+        {
+            if (product == null) return false;
+
+            return IsString(product.Name) && IsString(product.Description) && IsDecimal(product.Price);
+        }
+        
         private static bool IsString(object value)
         {
             return value is string stringValue && !string.IsNullOrEmpty(stringValue);
         }
 
-        // Check if account is null / not found
-        public static bool AllPropertiesAreNull(Account account)
+        private static bool IsDecimal(object value)
         {
-            return account.Id == 0 && account.Username == null && account.Email == null && account.Password == null;
+            return value is decimal decimalValue && decimalValue != 0.0M;
+        }
+
+        // Check if account is null / not found
+        public static bool IsAccountNull(Account account)
+        {
+            return account.Id == 0 && 
+                account.Username == null && 
+                account.Email == null && 
+                account.Password == null;
+        }
+
+        // Check if product is null / not found
+        public static bool IsProductNull(Product product)
+        {
+            return product.Id == 0 && 
+                product.Name == null && 
+                product.Description == null && 
+                product.Price == 0.0M ;
         }
 
         public static string HashPassword(string password)
@@ -70,18 +110,26 @@ namespace ApiWebApp.Services
         // ASYNC FUNCTIONS
         //
 
-        // Check if an username is already in use
-        public static async Task<bool> IsUsernameAvailableAsync(string username)
+        // Check if an account's username is already in use
+        public static async Task<bool> IsAccountUsernameAvailableAsync(string username)
         {
-            bool isUsernameInUse = await HelperRepository.IsUsernameAvailableRepositoryAsync(username);
+            bool isUsernameInUse = await HelperRepository.IsAccountUsernameAvailableRepositoryAsync(username);
             return isUsernameInUse;
         }
 
-        // Check if an email is already in use
-        public static async Task<bool> IsEmailAvailableAsync(string email)
+        // Check if an account's email is already in use
+        public static async Task<bool> IsAccountEmailAvailableAsync(string email)
         {
-            bool isEmailInUse = await HelperRepository.IsEmailAvailableRepositoryAsync(email);
+            bool isEmailInUse = await HelperRepository.IsAccountEmailAvailableRepositoryAsync(email);
             return isEmailInUse;
+        }
+
+
+        // Check if an product's name is already in use
+        public static async Task<bool> IsProductNameAvailableAsync(string name)
+        {
+            bool isNameInUse = await HelperRepository.IsProductNameAvailableRepositoryAsync(name);
+            return isNameInUse;
         }
     }
 }

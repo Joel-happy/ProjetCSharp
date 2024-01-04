@@ -45,7 +45,7 @@ namespace ApiWebApp
             }
             else if (route.StartsWith("/products"))
             {
-                // await ProductController.HandleProductsAsync(context);
+                await ProductController.HandleProductsAsync(context);
             }
             else
             {
