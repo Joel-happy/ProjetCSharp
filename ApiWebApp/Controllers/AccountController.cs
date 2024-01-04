@@ -112,8 +112,27 @@ namespace ApiWebApp.Controllers
         // Handle UPDATE operation
         private static async Task HandleUpdateOperationAsync(HttpListenerContext context)
         {
-            // TO DO
-            await Task.CompletedTask;
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse response = context.Response;
+
+            string route = request.Url.AbsolutePath;
+            string accountIdToUpdate = HelperController.GetIdAccountFromUrl(route);
+            string accountRequestBody = await HelperController.ReadRequestBodyAsync(request);
+
+            try
+            {
+                ApiResult<string> apiResult = await AccountService.UpdateAccountAsync(accountIdToUpdate, accountRequestBody);
+                await HelperController.HandleApiResult(response, apiResult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in HandleUpdateOperationAsync() : {ex.Message}");
+                await HelperController.SendResponseAsync(response, HttpStatusCode.InternalServerError, ErrorMessage);
+            }
+            finally
+            {
+                response.Close();
+            }
         }
 
         // Handle DELETE operation

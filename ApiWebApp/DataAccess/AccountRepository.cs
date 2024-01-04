@@ -12,7 +12,7 @@ namespace ApiWebApp.DataAccess
         private const string DatabaseErrorMessage = "A database error occured";
         private const string ErrorMessage = "An error occured while processing the request";
 
-        // Get accounts
+        // READ Accounts
         public static async Task<ApiResult<List<Account>>> GetAccountsRepositoryAsync()
         {
             try
@@ -73,7 +73,7 @@ namespace ApiWebApp.DataAccess
             }
         }
 
-        // Get account by id
+        // READ Account by ID
         public static async Task<ApiResult<Account>> GetAccountByIdRepositoryAsync(int accountId)
         {
             try
@@ -131,8 +131,8 @@ namespace ApiWebApp.DataAccess
             }
         }
 
-        // Create account
-        public static async Task<ApiResult<string>> CreateAccountRepository(Account account)
+        // CREATE Account
+        public static async Task<ApiResult<string>> CreateAccountRepositoryAsync(Account account)
         {
             try
             {
@@ -177,8 +177,66 @@ namespace ApiWebApp.DataAccess
                 };
             }
         }
+        
+        // UPDATE Account
+        public static async Task<ApiResult<string>> UpdateAccountRepositoryAsync(int accountIdToUpdate, Account account)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source ={HelperRepository.GetDatabaseFilePath()}; Version = 3;"))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (SQLiteCommand command = new SQLiteCommand("UPDATE account SET username = @username, email = @email, password = @password WHERE account_id = @accountId", connection))
+                    {
+                        command.Parameters.AddWithValue("@username", account.Username);
+                        command.Parameters.AddWithValue("@email", account.Email);
+                        command.Parameters.AddWithValue("@password", account.Password);
+                        command.Parameters.AddWithValue("@accountId", accountIdToUpdate);
+                        
+                        int affectedRows = await command.ExecuteNonQueryAsync();
 
-        // Delete account
+                        if (affectedRows > 0)
+                        {
+                            return new ApiResult<string>
+                            {
+                                Result = "Account updated successfully",
+                                StatusCode = HttpStatusCode.OK
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResult<string>
+                            {
+                                ErrorMessage = "Account not found",
+                                StatusCode = HttpStatusCode.NotFound
+                            };
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"SQLite error in UpdateAccountRepositoryAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = DatabaseErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in UpdateAccountRepositoryAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+        }
+
+        // DELETE Account
         public static async Task<ApiResult<string>> DeleteAccountRepositoryAsync(int accountIdToDelete)
         {
             try
@@ -196,7 +254,6 @@ namespace ApiWebApp.DataAccess
                         
                         if (affectedRows > 0)
                         {
-                            // The account was successfully deleted
                             return new ApiResult<string>
                             {
                                 Result = "Account deleted successfully",

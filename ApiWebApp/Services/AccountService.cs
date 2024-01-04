@@ -137,7 +137,7 @@ namespace ApiWebApp.Services
                     {
                         account.Password = HelperService.HashPassword(account.Password);
 
-                        ApiResult<string> apiResult = await AccountRepository.CreateAccountRepository(account);
+                        ApiResult<string> apiResult = await AccountRepository.CreateAccountRepositoryAsync(account);
 
                         if (apiResult.IsSuccess)
                         {
@@ -180,6 +180,79 @@ namespace ApiWebApp.Services
             }
         }
 
+        // Service UPDATE
+        public static async Task<ApiResult<string>> UpdateAccountAsync(string accountIdToUpdate, string accountRequestBody)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountIdToUpdate) || !int.TryParse(accountIdToUpdate, out _))
+                {
+                    return new ApiResult<string>
+                    {
+                        ErrorMessage = InvalidIdErrorMessage,
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                }
+
+                ApiResult<Account> deserializationResult = HelperService.DeserializeAccount(accountRequestBody);
+
+                if (deserializationResult.IsSuccess)
+                {
+                    Account account = deserializationResult.Result;
+
+                    if (HelperService.IsAccountValid(account))
+                    {
+                        account.Password = HelperService.HashPassword(account.Password);
+                        int intAccountIdToUpdate = int.Parse(accountIdToUpdate);
+
+                        ApiResult<string> apiResult = await AccountRepository.UpdateAccountRepositoryAsync(intAccountIdToUpdate, account);
+
+                        if (apiResult.IsSuccess)
+                        {
+                            return new ApiResult<string>
+                            {
+                                Result = apiResult.Result,
+                                StatusCode = apiResult.StatusCode
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResult<string>
+                            {
+                                ErrorMessage = apiResult.ErrorMessage,
+                                StatusCode = apiResult.StatusCode
+                            };
+                        }
+                    }
+                    else
+                    {
+                        return new ApiResult<string>
+                        {
+                            ErrorMessage = "Invalid 'account'",
+                            StatusCode = HttpStatusCode.BadRequest
+                        };
+                    }
+                }
+                else
+                {
+                    return new ApiResult<string>
+                    {
+                        ErrorMessage = deserializationResult.ErrorMessage,
+                        StatusCode = deserializationResult.StatusCode
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in UpdateAccountAsync() : {ex.Message}");
+                return new ApiResult<string>
+                {
+                    ErrorMessage = ErrorMessage,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+        }
+        
         // Service DELETE
         public static async Task<ApiResult<string>> DeleteAccountAsync(string accountIdToDelete)
         {
