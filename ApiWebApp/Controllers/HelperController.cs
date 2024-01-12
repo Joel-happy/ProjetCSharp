@@ -54,7 +54,7 @@ namespace ApiWebApp.Controllers
 
             // Set status code
             response.StatusCode = (int)statusCode;
-
+            
             using (Stream output = response.OutputStream)
             {
                 byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(result);

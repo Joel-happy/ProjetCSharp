@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mihut\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj": {}
+    "C:\\Users\\mariu\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mihut\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj": {
+    "C:\\Users\\mariu\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mihut\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj",
+        "projectUniqueName": "C:\\Users\\mariu\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj",
         "projectName": "ApiWebApp",
-        "projectPath": "C:\\Users\\mihut\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj",
-        "packagesPath": "C:\\Users\\mihut\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mihut\\Desktop\\ProjetCSharp\\ApiWebApp\\obj\\",
+        "projectPath": "C:\\Users\\mariu\\Desktop\\ProjetCSharp\\ApiWebApp\\ApiWebApp.csproj",
+        "packagesPath": "C:\\Users\\mariu\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mariu\\Desktop\\ProjetCSharp\\ApiWebApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\mihut\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\mariu\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -60,7 +60,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.416\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.415\\RuntimeIdentifierGraph.json"
         }
       }
     }
