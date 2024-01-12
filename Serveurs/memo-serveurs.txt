@@ -1,0 +1,59 @@
+Choix de la Distribution : Debian 12.4.0
+Distribution : Debian 12.4.0
+Architecture : 64 bits
+Raisons :
+Stabilité et Fiabilité : Debian est connu pour sa stabilité, ce qui en fait un excellent choix pour un serveur.
+Sécurité : Debian a une bonne réputation en termes de sécurité, un facteur important pour un serveur.
+64 bits : Permet une meilleure gestion de la mémoire et des performances accrues, en particulier pour les applications gourmandes en ressources.
+Choix de l'Installation : Netinst
+Type d'Installation : Netinst (installation par le réseau)
+Raisons :
+Contrôle sur les Paquets Installés : Permet une installation minimaliste, ce qui est idéal pour un serveur où seuls les outils nécessaires sont installés.
+Flexibilité : Vous pouvez choisir exactement quels paquets et services installer, réduisant ainsi le bloatware et les vulnérabilités potentielles.
+Configuration de l'Installation
+Sans Interface Graphique :
+Raisons :
+Performances et Efficacité : Une installation sans GUI consomme moins de ressources système, ce qui est préférable pour un serveur.
+Gestion Simplifiée : Les serveurs sont souvent gérés via la ligne de commande, rendant l'interface graphique superflue.
+Services Sélectionnés :
+Utilitaires système standard : Pour les opérations de base et la maintenance du système.
+Serveur SSH (si sélectionné) : Pour la gestion à distance sécurisée du serveur.
+Post-Installation et Maintenance
+Mises à Jour des Paquets : Pour s'assurer que le système est à jour avec les derniers correctifs de sécurité et améliorations.
+Installation de Logiciels Supplémentaires : Comme Apache et MySQL, en fonction des besoins de votre projet.
+Sécurisation du Serveur : En configurant des éléments comme MySQL Secure Installation et un pare-feu.
+Raisons Globales pour ce Choix
+Apprentissage et Expérience : Travailler avec Debian offre une occasion d'apprendre en profondeur sur la gestion des systèmes Linux.
+Personnalisation et Contrôle : Vous avez un contrôle total sur la configuration et la personnalisation de votre serveur, ce qui est idéal pour les besoins spécifiques du  projet
+
+------------------------------------------------
+
+Problème
+Issue rencontrée : La commande adduser affichait l'erreur "commande introuvable" même après son installation.
+Étapes de Dépannage et Résolution
+Vérification de l'Installation de adduser :
+
+Utilisation de whereis adduser pour vérifier si adduser est installé et localiser son chemin d'exécution.
+Confirmation que adduser est normalement situé dans /usr/sbin/adduser.
+Vérification et Modification de la Variable $PATH :
+
+Utilisation de echo $PATH pour afficher le chemin d'accès actuel.
+Confirmation que /usr/sbin doit être inclus dans $PATH pour que la commande adduser soit reconnue.
+Ajout temporaire de /usr/sbin au $PATH avec export PATH=$PATH:/usr/sbin.
+Exécution Directe de adduser :
+
+Tentative d'exécution de adduser directement depuis son chemin complet : /usr/sbin/adduser.
+Modification des Fichiers de Profil de l'Utilisateur :
+
+Ouverture et modification du fichier .bashrc pour inclure /usr/sbin dans $PATH de manière permanente.
+Rechargement des modifications avec source ~/.bashrc.
+Solution Alternative :
+
+Envisage de l'utilisation de useradd comme alternative à adduser si le problème persiste.
+Résolution Sans Redémarrage :
+
+Confirmation que le problème a été résolu sans nécessiter de redémarrage.
+Conseils et Bonnes Pratiques
+Documentation des Changements : Garder une trace des modifications apportées aux fichiers de configuration et aux variables d'environnement.
+Prudence avec les Commandes Root : Exercer une prudence particulière lors de la modification des variables système et des fichiers de configuration en tant qu'utilisateur root.
+Compréhension de $PATH : Comprendre l'importance de la variable d'environnement $PATH dans la reconnaissance des commandes sous Linux.

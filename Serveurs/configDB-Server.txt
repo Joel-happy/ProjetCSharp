@@ -1,0 +1,17 @@
+login:serverDB
+psswd:server
+root psswd:ynov
+
+mysql
+port: 3306
+login root
+pswd:paris
+--------------
+
+
+
+
+
+login:serverWeb
+psswd:server
+root:ynov
