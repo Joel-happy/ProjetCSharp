@@ -1,4 +1,5 @@
 ﻿using ApiWebApp.Controllers;
+using ApiWebApp.UserInterface;
 using System;
 using System.IO;
 using System.Net;
@@ -8,20 +9,22 @@ namespace ApiWebApp
 {
     class Program
     {
-        static Task Main()
+        static async Task Main()
         {
             // Create a HttpListener that listens on the loopback address (localhost), on the port 8080
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:8080/");
             listener.Start();
-
+            
             Console.WriteLine("Listening for requests...");
+
+            _= Task.Run(() => UI.StartInterface());
 
             while (true)
             {
                 try
                 {
-                    HttpListenerContext context = listener.GetContext();
+                    HttpListenerContext context = await listener.GetContextAsync();
 
                     // _ is a convention to show that the result is intentionally being ignored
                     _ = HandleRouteAsync(context);

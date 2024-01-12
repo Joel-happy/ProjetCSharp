@@ -24,7 +24,6 @@ namespace ApiWebApp.DataAccess
         public static string GetProjectRoot()
         {
             string executableDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            Console.WriteLine(executableDirectory);
             return Path.Combine(executableDirectory, "../../../../");
         }
 

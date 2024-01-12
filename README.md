@@ -5,6 +5,7 @@
 - [Project Structure Overview](#project-structure-overview)
 - [Usage](#usage)
 - [High Level Flow](#high-level-flow)
+- [About](#about)
 
 ##  Introduction
 The goal of the project is to create an API using C# that will be deployed on a Linux Apache server. Additionally, the database for this server will be hosted on a Linux MySql server to establish a sturdy and efficient architecture. The API main purpose is handling CRUD operations for **Accounts** and **Products**.
@@ -72,3 +73,6 @@ The service receives the result from the data access layer and prepares a HTTP r
 
 ### • HTTP Response
 The controller sends the HTTP response back to the client. The response may include the status code (2xx, 4xx, 5xx), headers or a response body if needed.
+
+## About
+• While the UI does indeed work, it is not linked to the actual API and database.
