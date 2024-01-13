@@ -1,0 +1,92 @@
+Partie 1 Installation Debian
+ 1:
+	- Télécharger debian sur Le site  officiel https://www.debian.org/index.fr.html une fois, fais 
+
+	- Monter l'image iso plus tard 
+
+
+	- Connexion en NAT
+	- Cliquer sur edit machine pour mettre l'iso 
+	
+Lorsque proposer choisissait de ne pas prendre le GUI ici on aura pas besoin d'interface graphique
+ 2: 
+une fois l'installation réussi 
+Régler le networking pour la mettre en réseau fixe
+
+Partie 2 Serveur web/ protocol http
+Installation de apache via la commande : - sudo apt-get install apache2 ,
+							Sudo apt-get install apache
+							
+Un fois installer utiliser votre editeur de texte vim/nano/etc:
+	- Ici vi /etc/apache2/conf-enabled/security.conf
+Aller a la ligne 25 et enlever le mode OS et le mettre en, mode Prod (juste si erreur il affichera apâche desactiver et numero de version )
+	- ci vi /etc/apache2/mods-enabled/dir.conf
+Ajouter index.htm ça permet de deployer une librarie compatible et aussi pouvoir déterminer quelle fichier appeler ou quelle fichier sera dans  son affichage web(fichier qui doit être situer sur le dossier /var/www/html 
+	- Ici vi /etc/apache2/apache2.conf
+Rajouter tout en bas de du texte pour le retrouver facilement si modification ultérieure
+C'est pour le DNS
+ ServerName <nom de l'adresse serveur / DNS> exemple google.fr
+
+	
+Puis aller sur /etc/apache2/sites-enabled
+Pour modifier la ligne du ServerAdmin webmaster@<le nom de domaine mis sur servername>
+
+A pas oublier de rajouter le ServerName donner dans le fichier apache2 (il est normalement mis en commentaire)
+Reboot l'ordinateur ou system restart apache/apache2
+
+
+Partie 3  Installation API
+
+
+Crée un dossier pour maintenir l'api
+on doit d'abord crée le dotnet api  
+Via la commande sudo dotnet api
+Puis on test si tout fonctionne 
+Il faut du coup etre dans le dossier et tapper la commande : dotnet run api mais si vous posseder déjà une api veuillez transferer les fichier de votre api sur le fichier du oest situer le dotnet .
+inserer le .dll donc faire : dotnet <fichier>.dll
+
+	- Créez un fichier de configuration nommé <nomdelapi>.conf, pour l’application :
+<VirtualHost *:*>
+    RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}s
+</VirtualHost>
+
+<VirtualHost *:80>
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:5000/
+    ProxyPassReverse / http://127.0.0.1:5000/
+    ServerName www.example.com
+    ServerAlias *.example.com
+    ErrorLog ${APACHE_LOG_DIR}/<nomdelapi>-error.log
+    CustomLog ${APACHE_LOG_DIR}/<nomdelapi>-access.log common
+</VirtualHost>
+<VirtualHost *:*>
+    RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
+</VirtualHost>
+Tester : sudo apachectl configtest
+
+	- Redémarrez Apache :
+sudo systemctl restart httpd
+sudo systemctl enable httpd
+	- Crée le fichier de service 
+sudo nano /etc/systemd/system/kestrel-helloapp.service
+[Unit]
+Description=Example .NET Web API App running on CentOS 7
+
+[Service]
+WorkingDirectory=<emplacement de l'asp.net>
+ExecStart=/usr/local/bin/dotnet <emplacement fichier dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-example
+User=apache
+Environment=ASPNETCORE_ENVIRONMENT=Production 
+
+[Install]
+WantedBy=multi-user.target
+
+	- Demarrer le service 
+sudo systemctl start kestrel-helloapp.service
+sudo systemctl status kestrel-helloapp.service
+
