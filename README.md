@@ -11,7 +11,7 @@
 The goal of the project is to create an API using C# that will be deployed on a Linux Apache server. Additionally, the database for this server will be hosted on a Linux MySql server to establish a sturdy and efficient architecture. The API main purpose is handling CRUD operations for **Accounts** and **Products**.
 
 ## Trello
-**Trello** was employed as our project management tools to efficiently organize and track the various tasks associated with out project.
+**Trello** was employed as our project management tools to efficiently organize and track the various tasks associated with our project.
 
 Link → *https://trello.com/b/IcqIE588/projet-c*
 
