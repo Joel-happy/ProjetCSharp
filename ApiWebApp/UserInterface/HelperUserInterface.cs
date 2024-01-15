@@ -84,5 +84,31 @@ namespace ApiWebApp.UserInterface
 
             await Task.CompletedTask;
         }
+                public static async Task ShearchArticleList(InventoryManager inventoryManager)
+        {
+            var flagName = false;
+            var flagPrice= false;
+            var articles = inventoryManager.GetArticles();
+
+            Console.WriteLine("Recherche par Prix ou par Nom 1 pour le prix 2 pour le nom :");
+            if (console.ReadLine() == "1");{
+                flagName= true;
+            }
+            else if (console.ReadLine() == "2")
+            {
+                flagPrice = true;
+            }
+            foreach (var article in articles)
+            {
+                if(article.name == Console.ReadLine() && flagname== true){ # ici je met la recherche par slice 
+                Console.WriteLine($"ID: {article.Id}, Nom: {article.Name}, Quantité: {article.Quantity}, Prix: {article.Price:C}");
+                }
+                if(article.Price == Console.ReadLine() && flagPrice== true){ # ici je met la recherche par tranche de vals
+                Console.WriteLine($"ID: {article.Id}, Nom: {article.Name}, Quantité: {article.Quantity}, Prix: {article.Price:C}");
+                }
+            }
+
+            await Task.CompletedTask;
+        } 
     }
 }
