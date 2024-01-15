@@ -1,4 +1,0 @@
-docker exec -it nom_du_conteneur_mysql mysql -u root -p"mot_de_passe" -e "GRANT ALL PRIVILEGES ON nom_de_la_base.* TO 'admin'@'%'; FLUSH PRIVILEGES;"
-pour accorder les privilèges à notre utilisateur
-et juste après il faut faire FLUSH PRIVILEGES;" pour que les changements prennent effet immédiatemment
- 
