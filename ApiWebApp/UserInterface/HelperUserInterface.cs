@@ -100,10 +100,10 @@ namespace ApiWebApp.UserInterface
             }
             foreach (var article in articles)
             {
-                if(article.name == Console.ReadLine() && flagname== true){ # ici je met la recherche par slice 
+                if(article.name == Console.ReadLine() && flagname== true){ // ici je met la recherche par slice 
                 Console.WriteLine($"ID: {article.Id}, Nom: {article.Name}, Quantité: {article.Quantity}, Prix: {article.Price:C}");
                 }
-                if(article.Price == Console.ReadLine() && flagPrice== true){ # ici je met la recherche par tranche de vals
+                if(article.Price == Console.ReadLine() && flagPrice== true){ // ici je met la recherche par tranche de vals
                 Console.WriteLine($"ID: {article.Id}, Nom: {article.Name}, Quantité: {article.Quantity}, Prix: {article.Price:C}");
                 }
             }
